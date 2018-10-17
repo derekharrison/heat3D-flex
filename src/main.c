@@ -36,7 +36,7 @@ static double fixed_boundary_west(double y, double z, double t)
      * return   temperature_west
      */
 
-    double temperature_west = 1.0;
+    double temperature_west = 300.0;
 
     return temperature_west;
 
@@ -57,7 +57,7 @@ static double fixed_boundary_east(double y, double z, double t)
      * return   temperature_east
      */
 
-    double temperature_east = 2.0;
+    double temperature_east = 300.0;
 
     return temperature_east;
 
@@ -78,7 +78,7 @@ static double fixed_boundary_south(double x,double z, double t)
      * return   temperature_south
      */
 
-    double temperature_south = 3.0;
+    double temperature_south = 300.0;
 
     return temperature_south;
 
@@ -99,7 +99,7 @@ static double fixed_boundary_north(double x,double z, double t)
      * return   temperature_north
      */
 
-    double temperature_north = 0.5;
+    double temperature_north = 300.0;
 
     return temperature_north;
 
@@ -120,7 +120,7 @@ static double fixed_boundary_bottom(double x,double y, double t)
      * return   temperature_bottom
      */
 
-    double temperature_bottom = 1.3;
+    double temperature_bottom = 300.0;
 
     return temperature_bottom;
 
@@ -141,7 +141,7 @@ static double fixed_boundary_top(double x,double y, double t)
      * return   temperature_top
      */
 
-    double temperature_top = 2.1;
+    double temperature_top = 300.0;
 
     return temperature_top;
 
@@ -162,7 +162,7 @@ static double flux_boundary_west(double y, double z, double t)
      * return   flux_west
      */
 
-    double flux_west = 1.0;
+    double flux_west = 800.0;
 
     return flux_west;
 
@@ -183,7 +183,7 @@ static double flux_boundary_east(double y, double z, double t)
      * return   flux_east
      */
 
-    double flux_east = 2.0;
+    double flux_east = 800.0;
 
     return flux_east;
 
@@ -204,7 +204,7 @@ static double flux_boundary_south(double x,double z, double t)
      * return   flux_south
      */
 
-    double flux_south = 3.0;
+    double flux_south = 800.0;
 
     return flux_south;
 
@@ -225,7 +225,7 @@ static double flux_boundary_north(double x,double z, double t)
      * return   flux_north
      */
 
-    double flux_north = 0.5;
+    double flux_north = 800.0;
 
     return flux_north;
 
@@ -246,7 +246,7 @@ static double flux_boundary_bottom(double x,double y, double t)
      * return   flux_bottom
      */
 
-    double flux_bottom = 1.3;
+    double flux_bottom = 800.0;
 
     return flux_bottom;
 
@@ -267,7 +267,7 @@ static double flux_boundary_top(double x,double y, double t)
      * return   flux_top
      */
 
-    double flux_top = 2.1;
+    double flux_top = 800.0;
 
     return flux_top;
 
@@ -291,7 +291,7 @@ static double source_equation(double x, double y, double z, double t)
      * return    q
      */
 
-    double q = 100.0;
+    double q = 800.0;
 
     return q;
 
@@ -312,31 +312,31 @@ int main(int argc, char *argv[])
     boundary_type_faces_t boundary_type_faces = {0};
 
     /* Set parameters and boundary conditions */
-    domain_size.Lx = 5.0;                               //length of domain along x coordinate
-    domain_size.Ly = 1.0;                               //length of domain along y coordinate
-    domain_size.Lz = 5.0;                               //length of domain along z coordinate
+    domain_size.Lx = 0.5;                               //length of domain along x coordinate
+    domain_size.Ly = 0.5;                               //length of domain along y coordinate
+    domain_size.Lz = 1.0;                               //length of domain along z coordinate
 
-    grid_size.nx = 4;                                   //amount of nodes along x coordinate
-    grid_size.ny = 5;                                   //amount of nodes along y coordinate
-    grid_size.nz = 6;                                   //amount of nodes along z coordinate
+    grid_size.nx = 19;                                   //amount of nodes along x coordinate
+    grid_size.ny = 19;                                   //amount of nodes along y coordinate
+    grid_size.nz = 39;                                   //amount of nodes along z coordinate
 
     time_dep_input.timesteps = 100;                     //number of timesteps
     time_dep_input.ti        = 0.0;                     //initial time
-    time_dep_input.tf        = 0.1;                     //final time
+    time_dep_input.tf        = 100.0;                     //final time
     time_dep_input.rho       = 3.0;                     //density
-    time_dep_input.Cp        = 1.0;                     //heat capacity
-    time_dep_input.Tinitial  = 10.0;                    //inital temperature of system
+    time_dep_input.Cp        = 10.0;                     //heat capacity
+    time_dep_input.Tinitial  = 0.0;                    //inital temperature of system
 
-    gammas.gammax = 2.0;                                //conductivity along x coordinate
-    gammas.gammay = 2.0;                                //conductivity along y coordinate
-    gammas.gammaz = 2.0;                                //conductivity along z coordinate
+    gammas.gammax = 15.1;                                //conductivity along x coordinate
+    gammas.gammay = 15.1;                                //conductivity along y coordinate
+    gammas.gammaz = 15.1;                                //conductivity along z coordinate
 
-    boundary_type_faces.west_boundary   = DIRICHLET;    //west face boundary type
+    boundary_type_faces.west_boundary   = NEUMANN;    //west face boundary type
     boundary_type_faces.east_boundary   = DIRICHLET;    //east face boundary type
-    boundary_type_faces.south_boundary  = DIRICHLET;    //bottom face boundary type
+    boundary_type_faces.south_boundary  = NEUMANN;    //bottom face boundary type
     boundary_type_faces.north_boundary  = DIRICHLET;    //north face boundary type
-    boundary_type_faces.bottom_boundary = DIRICHLET;    //bottom face boundary type
-    boundary_type_faces.top_boundary    = DIRICHLET;    //top face boundary type
+    boundary_type_faces.bottom_boundary = DIRICHLET;  //bottom face boundary type
+    boundary_type_faces.top_boundary    = NEUMANN;    //top face boundary type
 
     exportData = TRUE;                                  //export data guard
 
@@ -376,6 +376,13 @@ int main(int argc, char *argv[])
         export_data("GridX.txt", "X grid coordinates", grid_size, grid_coordinates->X);
         export_data("GridY.txt", "Y grid coordinates", grid_size, grid_coordinates->Y);
         export_data("GridZ.txt", "Z grid coordinates", grid_size, grid_coordinates->Z);
+
+        export_T_data_alongz_atxy("T_alongz_atxy.gnumeric", grid_size, grid_coordinates,
+                                 ((grid_size.nx - 1)/2)+1, ((grid_size.ny - 1)/2)+1, T);
+        export_T_data_alongy_atxz("T_alongy_atxz.gnumeric", grid_size, grid_coordinates,
+                                 ((grid_size.nx - 1)/2)+1, ((grid_size.nz - 1)/2)+1, T);
+        export_T_data_alongx_atyz("T_alongx_atyz.gnumeric", grid_size, grid_coordinates,
+                                 ((grid_size.ny - 1)/2)+1, ((grid_size.nz - 1)/2)+1, T);
     }
 
     /* Freeing memory */

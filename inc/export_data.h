@@ -16,4 +16,25 @@ void export_data(char* file_name,
                  grid_size_t grid_size,
                  double ***ptr);
 
+void export_T_data_alongz_atxy(char* file_name,
+                               grid_size_t grid_size,
+                               grid_coordinates_t* grid_coordinates,
+                               int node_x,
+                               int node_y,
+                               double ***T);
+
+void export_T_data_alongy_atxz(char* file_name,
+                               grid_size_t grid_size,
+                               grid_coordinates_t* grid_coordinates,
+                               int node_x,
+                               int node_z,
+                               double ***T);
+
+void export_T_data_alongx_atyz(char* file_name,
+                               grid_size_t grid_size,
+                               grid_coordinates_t* grid_coordinates,
+                               int node_y,
+                               int node_z,
+                               double ***T);
+
 #endif /* EXPORT_DATA_H_ */

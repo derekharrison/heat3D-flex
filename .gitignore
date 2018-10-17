@@ -5,3 +5,12 @@ GridX.txt
 GridY.txt
 GridZ.txt
 heat3D.txt
+T_alongx_atyz.gnumeric
+T_alongx_atyz.txt
+T_alongx_atyz_verification.gnumeric
+T_alongy_atxz.gnumeric
+T_alongy_atxz.txt
+T_alongy_atxz_verification.gnumeric
+T_alongz_atxy.gnumeric
+T_alongz_atxy.txt
+T_alongz_atxy_verification.gnumeric
