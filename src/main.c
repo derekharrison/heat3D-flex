@@ -299,8 +299,8 @@ static double source_equation(double x, double y, double z, double t)
 
 
 /*-----------------------------------------------------------------------------------------------*/
-void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
-                             boundary_conditions_t* boundary_conditions)
+static void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
+                                    boundary_conditions_t* boundary_conditions)
 {
     /*
      * Set input boundary conditions and types for heat3D solver
