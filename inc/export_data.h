@@ -11,10 +11,10 @@
 #include "user_types.h"
 
 
-void export_data(char* file_name,
-                 char* type_data,
-                 grid_size_t grid_size,
-                 double ***ptr);
+void export_temperature_field(char* file_name,
+                              char* type_data,
+                              grid_size_t grid_size,
+                              double ***ptr);
 
 void export_T_data_alongz_atxy(char* file_name,
                                grid_size_t grid_size,
@@ -36,5 +36,14 @@ void export_T_data_alongx_atyz(char* file_name,
                                int node_y,
                                int node_z,
                                double ***T);
+
+void write_data_to_vtk(char* file_name,
+                       grid_size_t grid_size,
+                       grid_coordinates_t* grid_coordinates,
+                       double ***ptr);
+
+void export_data(grid_size_t grid_size,
+                 grid_coordinates_t* grid_coordinates,
+                 double ***T);
 
 #endif /* EXPORT_DATA_H_ */

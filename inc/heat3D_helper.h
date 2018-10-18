@@ -23,7 +23,7 @@ void dot_product(double *v1,
                  int size_vec,
                  double *dotproduct);
 
-void calculate_Ap(grid_size_t grid_size,
+void mat_vec_mult(grid_size_t grid_size,
                   double** A,
                   double* p,
                   double* Astorp);

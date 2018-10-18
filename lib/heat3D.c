@@ -89,9 +89,7 @@ void heat3D(domain_size_t domain_size,
 
     /*Initializing temperature fields*/
     for (j = 1; j <= nt; j++)
-    {
         x[j]  = time_dep_input.Tinitial;
-    }
 
     deltax = domain_size.Lx/grid_size.nx;
     deltay = domain_size.Ly/grid_size.ny;
@@ -124,71 +122,56 @@ void heat3D(domain_size_t domain_size,
                                     A);
 
         /* ICCG preconditioning */
-        // Incomplete Cholesky factorization of coefficient matrix A
         incomplete_cholesky_factorization(grid_size, A, L);
 
-        //Solving Ly=r (y = L'z)
         Ly_solver(grid_size, L, r, y);
 
-        //Solving L'z=y
         LTz_solver(grid_size, L, y, z);
 
         /* Solver iterations */
-        //epsilon = r'*r
         dot_product(r, r, nt, &epsilon);
 
-        //Setting p = z
         for (j=1;j<=nt;j++)
             p[j]=z[j];
 
         it = 0;
         do
         {
-            //Calculating Ap = A*p
-            calculate_Ap(grid_size, A, p, Ap);
+            mat_vec_mult(grid_size, A, p, Ap);
 
-            //delold = r'*z
             dot_product(r, z, nt, &delold);
 
-            //pAp = p'*Ap
             dot_product(p, Ap, nt, &pAp);
 
             alpha = delold/pAp;
 
-            //x = x+alpha*p
-            vector_addition(x, 1.0,    p, alpha, nt, x);
+            vector_addition(x, 1.0, p, alpha, nt, x);
 
-            //r = r-alpha*Ap
-            vector_addition(r, 1.0,    Ap, -alpha, nt, r);
+            vector_addition(r, 1.0, Ap, -alpha, nt, r);
 
-            //Solving Ly=r (y = L'z)
-            Ly_solver(grid_size,L,r,y);
+            Ly_solver(grid_size, L, r, y);
 
-            //Solving L'z=y
-            LTz_solver(grid_size,L,y,z);
+            LTz_solver(grid_size, L, y, z);
 
-            //delnew = r'*z
             dot_product(r, z, nt, &delnew);
 
             B = delnew/delold;
 
-            //p = z + B*p;
-            vector_addition(z, 1.0,    p, B, nt, p);
+            vector_addition(z, 1.0, p, B, nt, p);
 
-            //epsilon = r'*r
             dot_product(r, r, nt, &epsilon);
 
-            //calculating error
             epsilon = sqrt(epsilon/nt);
+
             it = it + 1;
 
         }while (it < imax && epsilon > error);
 
-        //Setting xo = x
         for (j=1;j<=nt;j++)
             xo[j]=x[j];
 
         time_dep_input.t = time_dep_input.t + dt;
+
         tt++;
 
     }while (tt < time_dep_input.timesteps);

@@ -299,6 +299,33 @@ static double source_equation(double x, double y, double z, double t)
 
 
 /*-----------------------------------------------------------------------------------------------*/
+void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
+                             boundary_conditions_t* boundary_conditions)
+{
+    /*
+     * Set input boundary conditions and types for heat3D solver
+     *
+     * input    boundary_type_faces
+     * output   boundary_conditions
+     */
+
+    boundary_conditions->boundary_type_faces = boundary_type_faces;
+    boundary_conditions->fixed_boundary_funcs.fixed_boundary_west = &fixed_boundary_west;
+    boundary_conditions->fixed_boundary_funcs.fixed_boundary_east = &fixed_boundary_east;
+    boundary_conditions->fixed_boundary_funcs.fixed_boundary_south = &fixed_boundary_south;
+    boundary_conditions->fixed_boundary_funcs.fixed_boundary_north = &fixed_boundary_north;
+    boundary_conditions->fixed_boundary_funcs.fixed_boundary_bottom = &fixed_boundary_bottom;
+    boundary_conditions->fixed_boundary_funcs.fixed_boundary_top = &fixed_boundary_top;
+
+    boundary_conditions->flux_boundary_funcs.flux_boundary_west = &flux_boundary_west;
+    boundary_conditions->flux_boundary_funcs.flux_boundary_east = &flux_boundary_east;
+    boundary_conditions->flux_boundary_funcs.flux_boundary_south = &flux_boundary_south;
+    boundary_conditions->flux_boundary_funcs.flux_boundary_north = &flux_boundary_north;
+    boundary_conditions->flux_boundary_funcs.flux_boundary_bottom = &flux_boundary_bottom;
+    boundary_conditions->flux_boundary_funcs.flux_boundary_top = &flux_boundary_top;
+}
+
+/*-----------------------------------------------------------------------------------------------*/
 int main(int argc, char *argv[])
 {
     bool                           exportData = FALSE;
@@ -344,20 +371,8 @@ int main(int argc, char *argv[])
     grid_coordinates = allocate_mem_grid_coordinates(grid_size.nx+1, grid_size.ny+1, grid_size.nz+1);
     T                = matrix3D(grid_size.nx+1, grid_size.ny+1, grid_size.nz+1);
 
-    /* Setting boundary types and functions */
-    boundary_conditions.fixed_boundary_funcs.fixed_boundary_west = &fixed_boundary_west;
-    boundary_conditions.fixed_boundary_funcs.fixed_boundary_east = &fixed_boundary_east;
-    boundary_conditions.fixed_boundary_funcs.fixed_boundary_south = &fixed_boundary_south;
-    boundary_conditions.fixed_boundary_funcs.fixed_boundary_north = &fixed_boundary_north;
-    boundary_conditions.fixed_boundary_funcs.fixed_boundary_bottom = &fixed_boundary_bottom;
-    boundary_conditions.fixed_boundary_funcs.fixed_boundary_top = &fixed_boundary_top;
-    boundary_conditions.flux_boundary_funcs.flux_boundary_west = &flux_boundary_west;
-    boundary_conditions.flux_boundary_funcs.flux_boundary_east = &flux_boundary_east;
-    boundary_conditions.flux_boundary_funcs.flux_boundary_south = &flux_boundary_south;
-    boundary_conditions.flux_boundary_funcs.flux_boundary_north = &flux_boundary_north;
-    boundary_conditions.flux_boundary_funcs.flux_boundary_bottom = &flux_boundary_bottom;
-    boundary_conditions.flux_boundary_funcs.flux_boundary_top = &flux_boundary_top;
-    boundary_conditions.boundary_type_faces = boundary_type_faces;
+    /* Setting boundary types and conditions */
+    set_boundary_conditions(boundary_type_faces, &boundary_conditions);
 
     /* Calling 3D heat conduction solver */
     heat3D(domain_size,
@@ -372,17 +387,7 @@ int main(int argc, char *argv[])
     /* Exporting data */
     if(exportData)
     {
-        export_data("heat3D.txt", "Temperature profile", grid_size, T);
-        export_data("GridX.txt", "X grid coordinates", grid_size, grid_coordinates->X);
-        export_data("GridY.txt", "Y grid coordinates", grid_size, grid_coordinates->Y);
-        export_data("GridZ.txt", "Z grid coordinates", grid_size, grid_coordinates->Z);
-
-        export_T_data_alongz_atxy("T_alongz_atxy.gnumeric", grid_size, grid_coordinates,
-                                 ((grid_size.nx - 1)/2)+1, ((grid_size.ny - 1)/2)+1, T);
-        export_T_data_alongy_atxz("T_alongy_atxz.gnumeric", grid_size, grid_coordinates,
-                                 ((grid_size.nx - 1)/2)+1, ((grid_size.nz - 1)/2)+1, T);
-        export_T_data_alongx_atyz("T_alongx_atyz.gnumeric", grid_size, grid_coordinates,
-                                 ((grid_size.ny - 1)/2)+1, ((grid_size.nz - 1)/2)+1, T);
+        export_data(grid_size, grid_coordinates, T);
     }
 
     /* Freeing memory */
