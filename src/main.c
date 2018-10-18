@@ -286,9 +286,9 @@ static double source_equation(double x, double y, double z, double t)
      *
      * input    x
      * input    y
-     * input     z
+     * input    z
      *
-     * return    q
+     * return   q
      */
 
     double q = 800.0;
