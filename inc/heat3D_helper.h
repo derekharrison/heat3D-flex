@@ -12,21 +12,21 @@
 
 
 void vector_addition(double *v1,
-                     double factor1,
+                     double f_v1,
                      double *v2,
-                     double factor2,
-                     int size_vector,
-                     double *output_vector);
+                     double f_v2,
+                     int size_vec,
+                     double *vr);
 
 void dot_product(double *v1,
                  double *v2,
                  int size_vec,
-                 double *dotproduct);
+                 double *vr);
 
 void mat_vec_mult(grid_size_t grid_size,
                   double** A,
                   double* p,
-                  double* Astorp);
+                  double* Ap);
 
 void generate_coefficient_matrix(domain_size_t domain_size,
                                  grid_size_t grid_size,

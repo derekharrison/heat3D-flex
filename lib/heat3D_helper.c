@@ -14,14 +14,16 @@
 
 /*-----------------------------------------------------------------------------------------------*/
 void vector_addition(double *v1,
-                     double factor_v1,
+                     double f_v1,
                      double *v2,
-                     double factor_v2,
-                     int size_vector,
-                     double *output_vector)
+                     double f_v2,
+                     int size_vec,
+                     double *vr)
 {
     /*
-     * Addition of vectors of type double
+     * Addition of vectors:
+     *
+     * vr = f_v1*v1 + f_v2*v2
      *
      * input    v1
      * input    factor_v1
@@ -33,8 +35,8 @@ void vector_addition(double *v1,
 
     int j;
 
-    for (j=1;j<=size_vector;j++)
-        output_vector[j] = factor_v1*v1[j] + factor_v2*v2[j];
+    for (j = 1; j <= size_vec; j++)
+        vr[j] = f_v1*v1[j] + f_v2*v2[j];
 
 }
 
@@ -43,15 +45,17 @@ void vector_addition(double *v1,
 void dot_product(double *v1,
                  double *v2,
                  int size_vec,
-                 double *dot_product)
+                 double *vr)
 {
     /*
-     * Calculating the dot product of two vectors of type double
+     * Calculating the dot product:
      *
-     * input    v1
-     * input    v2
+     * v_r = v_1'*v_2
+     *
+     * input    v_1
+     * input    v_2
      * input    size_vec
-     * output   dot_product
+     * output   v_r
      */
 
     int j;
@@ -60,7 +64,7 @@ void dot_product(double *v1,
     for (j = 1; j <= size_vec; j++)
         dummy = dummy + v1[j]*v2[j];
 
-    *dot_product = dummy;
+    *vr = dummy;
 
 }
 
@@ -72,12 +76,14 @@ void mat_vec_mult(grid_size_t grid_size,
                   double* Ap)
 {
     /*
-     * Calculating the matrix product A*p where A is the vectorized coefficient matrix
+     * Calculating the matrix product A*p where A is the vectorized coefficient matrix:
+     *
+     * Ap = A*p
      *
      * input    grid_size
      * input    A
      * input    p
-     * output    Ap
+     * output   Ap
      */
 
     int j;
@@ -758,12 +764,13 @@ void Ly_solver(grid_size_t grid_size,
                double* y)
 {
     /*
-     * Solves the linear system Lz = r where L is lower triangular
+     * Solves the linear system Ly = r where L is lower triangular
+     * and L trivially vectorized
      *
-     * input     grid_size
+     * input    grid_size
      * input    L
      * input    r
-     * output    y
+     * output   y
      */
 
     int j;
@@ -792,12 +799,13 @@ void LTz_solver(grid_size_t grid_size,
                 double* z)
 {
     /*
-     * Solves the linear system L'y = z where L' is upper triangular
+     * Solves the linear system Ly = z where L is upper triangular
+     * and L trivially vectorized
      *
-     * input     grid_size
+     * input    grid_size
      * input    L
      * input    y
-     * output    z
+     * output   z
      */
 
     int j;

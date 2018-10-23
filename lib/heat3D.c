@@ -70,8 +70,8 @@ void heat3D(domain_size_t domain_size,
     begin = clock();
 
     /*Initializing parameters*/
-    imax     = 5000;         //Maximum iterations ICCG
-    error     = 1e-30;        //Tolerance
+    imax  = 5000;         //Maximum iterations ICCG
+    error = 1e-30;        //Tolerance
 
     nt = grid_size.nx*grid_size.ny*grid_size.nz;
     dt = (double) (time_dep_input.tf - time_dep_input.ti)/time_dep_input.timesteps;
