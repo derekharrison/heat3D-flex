@@ -953,16 +953,6 @@ void preconditioning(grid_size_t grid_size,
                                       kershaw_data->A,
                                       kershaw_data->L);
 
-    Ly_solver(grid_size,
-              kershaw_data->L,
-              kershaw_data->r,
-              kershaw_data->y);
-
-    LTz_solver(grid_size,
-               kershaw_data->L,
-               kershaw_data->y,
-               kershaw_data->z);
-
 }
 
 
@@ -979,7 +969,7 @@ void execute_kershaw_algorithm(grid_size_t grid_size,
 
     double delold, delnew, pAp, error;
     double alpha, B;
-    int nt, j, imax;
+    int nt, imax;
 
     /*Initializing parameters*/
     imax  = 5000;
@@ -991,21 +981,28 @@ void execute_kershaw_algorithm(grid_size_t grid_size,
                 nt,
                 &(kershaw_data->epsilon));
 
-    for (j = 1; j <= nt; j++)
-        kershaw_data->p[j] = kershaw_data->z[j];
+    Ly_solver(grid_size,
+              kershaw_data->L,
+              kershaw_data->r,
+              kershaw_data->y);
+
+    LTz_solver(grid_size,
+               kershaw_data->L,
+               kershaw_data->y,
+               kershaw_data->p);
 
     kershaw_data->iterations = 0;
     do
     {
+        dot_product(kershaw_data->r,
+                    kershaw_data->p,
+                    nt,
+                    &delold);
+
         mat_vec_mult(grid_size,
                      kershaw_data->A,
                      kershaw_data->p,
                      kershaw_data->Ap);
-
-        dot_product(kershaw_data->r,
-                    kershaw_data->z,
-                    nt,
-                    &delold);
 
         dot_product(kershaw_data->p,
                     kershaw_data->Ap,
