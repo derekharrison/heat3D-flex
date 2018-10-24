@@ -344,9 +344,9 @@ int main(int argc, char *argv[])
     domain_size.Ly = 0.5;                               //length of domain along y coordinate
     domain_size.Lz = 1.0;                               //length of domain along z coordinate
 
-    grid_size.nx = 5;                                   //amount of nodes along x coordinate
-    grid_size.ny = 5;                                   //amount of nodes along y coordinate
-    grid_size.nz = 9;                                   //amount of nodes along z coordinate
+    grid_size.nx = 19;                                   //amount of nodes along x coordinate
+    grid_size.ny = 19;                                   //amount of nodes along y coordinate
+    grid_size.nz = 39;                                   //amount of nodes along z coordinate
 
     time_dep_input.timesteps = 100;                     //number of timesteps
     time_dep_input.ti        = 0.0;                     //initial time
