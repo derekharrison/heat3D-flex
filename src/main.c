@@ -36,7 +36,7 @@ static double fixed_boundary_west(double y, double z, double t)
      * return   temperature_west
      */
 
-    double temperature_west = 300.0;
+    double temperature_west = 1.0;
 
     return temperature_west;
 
@@ -57,7 +57,7 @@ static double fixed_boundary_east(double y, double z, double t)
      * return   temperature_east
      */
 
-    double temperature_east = 300.0;
+    double temperature_east = 2.0;
 
     return temperature_east;
 
@@ -78,7 +78,7 @@ static double fixed_boundary_south(double x,double z, double t)
      * return   temperature_south
      */
 
-    double temperature_south = 300.0;
+    double temperature_south = 3.0;
 
     return temperature_south;
 
@@ -99,7 +99,7 @@ static double fixed_boundary_north(double x,double z, double t)
      * return   temperature_north
      */
 
-    double temperature_north = 300.0;
+    double temperature_north = 0.5;
 
     return temperature_north;
 
@@ -120,7 +120,7 @@ static double fixed_boundary_bottom(double x,double y, double t)
      * return   temperature_bottom
      */
 
-    double temperature_bottom = 300.0;
+    double temperature_bottom = 1.3;
 
     return temperature_bottom;
 
@@ -141,7 +141,7 @@ static double fixed_boundary_top(double x,double y, double t)
      * return   temperature_top
      */
 
-    double temperature_top = 300.0;
+    double temperature_top = 2.1;
 
     return temperature_top;
 
@@ -291,7 +291,7 @@ static double source_equation(double x, double y, double z, double t)
      * return   q
      */
 
-    double q = 800.0;
+    double q = 100.0;
 
     return q;
 
@@ -340,31 +340,31 @@ int main(int argc, char *argv[])
 
 
     /* Set parameters and boundary conditions */
-    domain_size.Lx = 0.5;                               //length of domain along x coordinate
-    domain_size.Ly = 0.5;                               //length of domain along y coordinate
-    domain_size.Lz = 1.0;                               //length of domain along z coordinate
+    domain_size.Lx = 5.0;                               //length of domain along x coordinate
+    domain_size.Ly = 1.0;                               //length of domain along y coordinate
+    domain_size.Lz = 5.0;                               //length of domain along z coordinate
 
-    grid_size.nx = 19;                                   //amount of nodes along x coordinate
-    grid_size.ny = 19;                                   //amount of nodes along y coordinate
-    grid_size.nz = 39;                                   //amount of nodes along z coordinate
+    grid_size.nx = 4;                                   //amount of nodes along x coordinate
+    grid_size.ny = 5;                                   //amount of nodes along y coordinate
+    grid_size.nz = 6;                                   //amount of nodes along z coordinate
 
     time_dep_input.timesteps = 100;                     //number of timesteps
     time_dep_input.ti        = 0.0;                     //initial time
-    time_dep_input.tf        = 100.0;                     //final time
+    time_dep_input.tf        = 0.1;                     //final time
     time_dep_input.rho       = 3.0;                     //density
     time_dep_input.Cp        = 10.0;                     //heat capacity
-    time_dep_input.Tinitial  = 0.0;                    //inital temperature of system
+    time_dep_input.Tinitial  = 10.0;                    //inital temperature of system
 
     gammas.gammax = 15.1;                                //conductivity along x coordinate
     gammas.gammay = 15.1;                                //conductivity along y coordinate
     gammas.gammaz = 15.1;                                //conductivity along z coordinate
 
-    boundary_type_faces.west_boundary   = NEUMANN;    //west face boundary type
+    boundary_type_faces.west_boundary   = DIRICHLET;    //west face boundary type
     boundary_type_faces.east_boundary   = DIRICHLET;    //east face boundary type
-    boundary_type_faces.south_boundary  = NEUMANN;    //bottom face boundary type
+    boundary_type_faces.south_boundary  = DIRICHLET;    //bottom face boundary type
     boundary_type_faces.north_boundary  = DIRICHLET;    //north face boundary type
     boundary_type_faces.bottom_boundary = DIRICHLET;  //bottom face boundary type
-    boundary_type_faces.top_boundary    = NEUMANN;    //top face boundary type
+    boundary_type_faces.top_boundary    = DIRICHLET;    //top face boundary type
 
     exportData = TRUE;                                  //export data guard
 
