@@ -130,30 +130,27 @@ void generate_coefficient_matrix(domain_size_t domain_size,
                                  time_dep_input_t time_dep_input,
                                  gammas_t gammas,
                                  double (*source)(double x,double y,double z,double t),
-                                 double* xo,
                                  grid_coordinates_t* grid_coordinates,
-                                 double* r,
-                                 double** A)
+                                 kershaw_algorithm_data_t* kershaw_data)
 {
     /*
      * Generated the vectorized coefficient matrix for the poisson solver
      *
-     * input    domain_size
-     * input    grid_size
-     * input    boundary_conditions
-     * input    time_dep_input
-     * input    gamma
-     * input    source
-     * input    xo
-     * input    grid_coordinates
-     * output   r
-     * output   A
+     * input        domain_size
+     * input        grid_size
+     * input        boundary_conditions
+     * input        time_dep_input
+     * input        gamma
+     * input        source
+     * input        grid_coordinates
+     * input/output kershaw_data
      */
 
     double deltax, deltay, deltaz;
     double b1, b2, b3;
     double dt, t, K;
     double ***X, ***Y, ***Z;
+    double *xo, *r, **A;
     int nn;
     int i, j, k;
     boundary_type_t west_boundary, east_boundary, south_boundary;
@@ -188,6 +185,10 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     b1 = -gammas.gammax/(deltax*deltax);
     b2 = -gammas.gammay/(deltay*deltay);
     b3 = -gammas.gammaz/(deltaz*deltaz);
+
+    xo = kershaw_data->x;
+    r  = kershaw_data->r;
+    A  = kershaw_data->A;
 
     /*Generating vectorized coefficient matrix*/
     //Generating central coefficients and source terms
@@ -866,25 +867,224 @@ void incomplete_cholesky_factorization(grid_size_t grid_size,
 }
 
 
-/*-----------------------------------------------------------------------------------------------*/
-void preconditioning(grid_size_t grid_size,
-                     double** A,
-                     double** L,
-                     double* y,
-                     double* z,
-                     double* r)
+void initialize_temperature_field(grid_size_t grid_size,
+                                  time_dep_input_t time_dep_input,
+                                  double *temp_field)
 {
     /*
-     * Performs the incomplete cholesky factorization on vectorized matrix A
+     * Initialize temperature field
      *
      * input    grid_size.
-     * input     A
-     * output    L
+     * input    time_dep_input
+     * output   x
      */
 
-    incomplete_cholesky_factorization(grid_size, A, L);
+    int j, nt;
 
-    Ly_solver(grid_size, L, r, y);
+    nt = grid_size.nx*grid_size.ny*grid_size.nz;
 
-    LTz_solver(grid_size, L, y, z);
+    for (j = 1; j <= nt; j++)
+        temp_field[j]  = time_dep_input.Tinitial;
+}
+
+
+/*-----------------------------------------------------------------------------------------------*/
+void initialize_time_data(time_dep_input_t time_data)
+{
+    /*
+     * Initialize temperature field
+     *
+     * output   time_data
+     */
+
+    time_data.t = time_data.ti;
+    time_data.current_timestep = 0;
+    time_data.dt = (time_data.tf - time_data.ti)/time_data.timesteps;
+}
+
+
+/*-----------------------------------------------------------------------------------------------*/
+void generate_grid_coordinates(domain_size_t domain_size,
+                               grid_size_t grid_size,
+                               grid_coordinates_t* grid_coordinates)
+{
+    /*
+     * Generate grid coordinates
+     *
+     * input    domain_size.
+     * input    grid_size
+     * output   grid_coordinates
+     */
+
+    int i, j, k;
+    double deltax, deltay, deltaz;
+
+    deltax = domain_size.Lx/grid_size.nx;
+    deltay = domain_size.Ly/grid_size.ny;
+    deltaz = domain_size.Lz/grid_size.nz;
+
+    /*Generating node coordinates*/
+    for (i = 1; i <= grid_size.nx; i++)
+    for (j = 1; j <= grid_size.ny; j++)
+    for (k = 1; k <= grid_size.nz; k++)
+    {
+        grid_coordinates->X[i][j][k] = i*deltax-deltax/2;
+        grid_coordinates->Y[i][j][k] = j*deltay-deltay/2;
+        grid_coordinates->Z[i][j][k] = k*deltaz-deltaz/2;
+    }
+}
+
+
+/*-----------------------------------------------------------------------------------------------*/
+void preconditioning(grid_size_t grid_size,
+                     kershaw_algorithm_data_t* kershaw_data)
+{
+    /*
+     * Precondition coefficient matrix A via incomplete cholesky factorization
+     *
+     * input    grid_size.
+     * input    A
+     * input    r
+     * output   y
+     * output   L
+     */
+
+    incomplete_cholesky_factorization(grid_size,
+                                      kershaw_data->A,
+                                      kershaw_data->L);
+
+    Ly_solver(grid_size,
+              kershaw_data->L,
+              kershaw_data->r,
+              kershaw_data->y);
+
+    LTz_solver(grid_size,
+               kershaw_data->L,
+               kershaw_data->y,
+               kershaw_data->z);
+
+}
+
+
+/*-----------------------------------------------------------------------------------------------*/
+void execute_kershaw_algorithm(grid_size_t grid_size,
+                               kershaw_algorithm_data_t* kershaw_data)
+{
+    /*
+     * Execute kershaw algorithm
+     *
+     * input        grid_size
+     * input/output kershaw_data
+     */
+
+    double delold, delnew, pAp, error;
+    double alpha, B;
+    int nt, j, imax;
+
+    /*Initializing parameters*/
+    imax  = 5000;
+    error = 1e-30;
+    nt    = grid_size.nx*grid_size.ny*grid_size.nz;
+
+    dot_product(kershaw_data->r,
+                kershaw_data->r,
+                nt,
+                &(kershaw_data->epsilon));
+
+    for (j = 1; j <= nt; j++)
+        kershaw_data->p[j] = kershaw_data->z[j];
+
+    kershaw_data->iterations = 0;
+    do
+    {
+        mat_vec_mult(grid_size,
+                     kershaw_data->A,
+                     kershaw_data->p,
+                     kershaw_data->Ap);
+
+        dot_product(kershaw_data->r,
+                    kershaw_data->z,
+                    nt,
+                    &delold);
+
+        dot_product(kershaw_data->p,
+                    kershaw_data->Ap,
+                    nt,
+                    &pAp);
+
+        alpha = delold/pAp;
+
+        vector_addition(kershaw_data->x,
+                        1.0,
+                        kershaw_data->p,
+                        alpha,
+                        nt,
+                        kershaw_data->x);
+
+        vector_addition(kershaw_data->r,
+                        1.0,
+                        kershaw_data->Ap,
+                        -alpha,
+                        nt,
+                        kershaw_data->r);
+
+        Ly_solver(grid_size,
+                  kershaw_data->L,
+                  kershaw_data->r,
+                  kershaw_data->y);
+
+        LTz_solver(grid_size,
+                   kershaw_data->L,
+                   kershaw_data->y,
+                   kershaw_data->z);
+
+        dot_product(kershaw_data->r,
+                    kershaw_data->z,
+                    nt,
+                    &delnew);
+
+        B = delnew/delold;
+
+        vector_addition(kershaw_data->z,
+                        1.0,
+                        kershaw_data->p,
+                        B,
+                        nt,
+                        kershaw_data->p);
+
+        dot_product(kershaw_data->r,
+                    kershaw_data->r,
+                    nt,
+                    &(kershaw_data->epsilon));
+
+        kershaw_data->epsilon = sqrt(kershaw_data->epsilon/nt);
+        kershaw_data->iterations = kershaw_data->iterations + 1;
+
+    }while (kershaw_data->iterations < imax && kershaw_data->epsilon > error);
+
+}
+
+
+/*-----------------------------------------------------------------------------------------------*/
+void processing_results(grid_size_t grid_size,
+                        kershaw_algorithm_data_t* kershaw_data,
+                        double*** T)
+{
+    /*
+     * Process results temperature field
+     *
+     * input    grid_size
+     * input    kershaw_data
+     * output   T
+     */
+
+    int i, j, k, nn;
+
+    for (i = 1; i <= grid_size.nx ; i++)
+    for (j = 1; j <= grid_size.ny ; j++)
+    for (k = 1; k <= grid_size.nz; k++)
+    {
+        nn = i + (j-1)*grid_size.nx + (k-1)*grid_size.nx*grid_size.ny;
+        T[i][j][k] = kershaw_data->x[nn];
+    }
 }

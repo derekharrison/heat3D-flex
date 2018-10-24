@@ -34,10 +34,8 @@ void generate_coefficient_matrix(domain_size_t domain_size,
                                  time_dep_input_t time_dep_input,
                                  gammas_t gammas,
                                  double (*source)(double x,double y,double z,double t),
-                                 double* xo,
                                  grid_coordinates_t* grid_coordinates,
-                                 double* r,
-                                 double** A);
+                                 kershaw_algorithm_data_t* kershaw_data);
 
 void Ly_solver(grid_size_t grid_size,
                double** L,
@@ -52,5 +50,25 @@ void LTz_solver(grid_size_t grid_size,
 void incomplete_cholesky_factorization(grid_size_t grid_size,
                                        double** A,
                                        double** L);
+
+void initialize_temperature_field(grid_size_t grid_size,
+                                  time_dep_input_t time_dep_input,
+                                  double *temp_field);
+
+void initialize_time_data(time_dep_input_t time_data);
+
+void generate_grid_coordinates(domain_size_t domain_size,
+                               grid_size_t grid_size,
+                               grid_coordinates_t* grid_coordinates);
+
+void preconditioning(grid_size_t grid_size,
+                     kershaw_algorithm_data_t* kershaw_data);
+
+void execute_kershaw_algorithm(grid_size_t grid_size,
+                               kershaw_algorithm_data_t* kershaw_data);
+
+void processing_results(grid_size_t grid_size,
+                        kershaw_algorithm_data_t* kershaw_data,
+                        double*** T);
 
 #endif /* heat3D_HELPER_H_ */

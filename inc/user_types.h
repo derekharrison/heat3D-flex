@@ -43,12 +43,14 @@ typedef struct grid_coordinates_t {
 
 typedef struct time_dep_input_t {
     int timesteps;
+    int current_timestep;
     double ti;
     double tf;
     double rho;
     double Cp;
     double Tinitial;
     double t;
+    double dt;
 }time_dep_input_t;
 
 typedef struct gammas_t {
@@ -94,4 +96,19 @@ typedef struct boundary_conditions_t {
     fixed_boundary_funcs_t fixed_boundary_funcs;
     flux_boundary_funcs_t flux_boundary_funcs;
 } boundary_conditions_t;
+
+typedef struct kershaw_algorithm_data_t {
+    double** A;
+    double* r;
+    double** L;
+    double* y;
+    double* z;
+    double* Ap;
+    double* p;
+    double* x;
+    double epsilon;
+    int iterations;
+} kershaw_algorithm_data_t;
+
+
 #endif /* USER_TYPES_H_ */
