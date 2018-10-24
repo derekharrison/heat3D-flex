@@ -885,6 +885,7 @@ void initialize_temperature_field(grid_size_t grid_size,
 
     for (j = 1; j <= nt; j++)
         temp_field[j]  = time_dep_input.Tinitial;
+
 }
 
 
@@ -900,6 +901,7 @@ void initialize_time_data(time_dep_input_t time_data)
     time_data.t = time_data.ti;
     time_data.current_timestep = 0;
     time_data.dt = (time_data.tf - time_data.ti)/time_data.timesteps;
+
 }
 
 
@@ -932,6 +934,7 @@ void generate_grid_coordinates(domain_size_t domain_size,
         grid_coordinates->Y[i][j][k] = j*deltay-deltay/2;
         grid_coordinates->Z[i][j][k] = k*deltaz-deltaz/2;
     }
+
 }
 
 
@@ -1084,4 +1087,5 @@ void processing_results(grid_size_t grid_size,
         nn = i + (j-1)*grid_size.nx + (k-1)*grid_size.nx*grid_size.ny;
         T[i][j][k] = kershaw_data->x[nn];
     }
+
 }
