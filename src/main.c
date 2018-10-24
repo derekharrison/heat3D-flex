@@ -338,6 +338,7 @@ int main(int argc, char *argv[])
     boundary_conditions_t boundary_conditions = {0};
     boundary_type_faces_t boundary_type_faces = {0};
 
+
     /* Set parameters and boundary conditions */
     domain_size.Lx = 0.5;                               //length of domain along x coordinate
     domain_size.Ly = 0.5;                               //length of domain along y coordinate
@@ -367,12 +368,15 @@ int main(int argc, char *argv[])
 
     exportData = TRUE;                                  //export data guard
 
+
     /* Allocating memory for input and output of poisson solver */
     grid_coordinates = allocate_mem_grid_coordinates(grid_size.nx+1, grid_size.ny+1, grid_size.nz+1);
     T                = matrix3D(grid_size.nx+1, grid_size.ny+1, grid_size.nz+1);
 
+
     /* Setting boundary types and conditions */
     set_boundary_conditions(boundary_type_faces, &boundary_conditions);
+
 
     /* Calling 3D heat conduction solver */
     heat3D(domain_size,
@@ -384,11 +388,13 @@ int main(int argc, char *argv[])
            grid_coordinates,
            T);
 
+
     /* Exporting data */
     if(exportData)
     {
         export_data(grid_size, grid_coordinates, T);
     }
+
 
     /* Freeing memory */
     free_grid_coordinates(grid_coordinates, grid_size.nx, grid_size.ny);
