@@ -864,3 +864,27 @@ void incomplete_cholesky_factorization(grid_size_t grid_size,
         }
 
 }
+
+
+/*-----------------------------------------------------------------------------------------------*/
+void preconditioning(grid_size_t grid_size,
+                     double** A,
+                     double** L,
+                     double* y,
+                     double* z,
+                     double* r)
+{
+    /*
+     * Performs the incomplete cholesky factorization on vectorized matrix A
+     *
+     * input    grid_size.
+     * input     A
+     * output    L
+     */
+
+    incomplete_cholesky_factorization(grid_size, A, L);
+
+    Ly_solver(grid_size, L, r, y);
+
+    LTz_solver(grid_size, L, y, z);
+}
