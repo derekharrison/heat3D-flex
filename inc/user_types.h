@@ -11,8 +11,10 @@
 
 #define TRUE 1
 #define FALSE 0
+#define N_BOUNDARIES 6
 
 typedef int bool;
+typedef double(*func_pointer)(double, double, double);
 
 typedef struct domain_size_t {
     double Lx;
@@ -68,6 +70,15 @@ typedef enum boundary_type_t {
     DIRICHLET = 1
 } boundary_type_t;
 
+typedef enum boundary_t {
+    WEST = 0,
+    EAST = 1,
+    SOUTH = 2,
+    NORTH = 3,
+    BOTTOM = 4,
+    TOP = 5
+} boundary_t;
+
 typedef struct boundary_type_faces_t {
     boundary_type_t west_boundary;
     boundary_type_t east_boundary;
@@ -95,10 +106,25 @@ typedef struct flux_boundary_funcs_t {
     double (*flux_boundary_top) (double x,double y, double t);
 } flux_boundary_funcs_t;
 
+typedef struct boundary_funcs_t {
+    double (*boundary_west) (double y, double z, double t);
+    double (*boundary_east) (double y, double z, double t);
+    double (*boundary_south) (double x,double z, double t);
+    double (*boundary_north) (double x,double z, double t);
+    double (*boundary_bottom) (double x,double y, double t);
+    double (*boundary_top) (double x,double y, double t);
+} boundary_funcs_t;
+
+typedef struct boundary_func_type_t {
+    double (*fixed_boundary) (double x1, double x2, double t);
+    double (*flux_boundary) (double x1, double x2, double t);
+} boundary_func_type_t;
+
 typedef struct boundary_conditions_t {
     boundary_type_faces_t boundary_type_faces;
     fixed_boundary_funcs_t fixed_boundary_funcs;
     flux_boundary_funcs_t flux_boundary_funcs;
+    boundary_funcs_t boundary_funcs;
 } boundary_conditions_t;
 
 typedef struct kershaw_algorithm_data_t {
