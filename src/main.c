@@ -16,12 +16,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../inc/boundary_functions.h"
 #include "../inc/export_data.h"
 #include "../inc/heat3D.h"
 #include "../inc/memory_functions.h"
+#include "../inc/parameters_and_boundary_types.h"
 #include "../inc/user_types.h"
 #include "../inc/mappings.h"
-#include "../inc/boundary_functions.h"
 
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -66,28 +67,20 @@ static void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
      * output   boundary_conditions
      */
 
-    int boundary_type;
+    boundary_t boundary_type;
 
-    boundary_conditions->boundary_type_faces = boundary_type_faces;
-    boundary_conditions->fixed_boundary_funcs.fixed_boundary_west = &fixed_boundary_west;
-    boundary_conditions->fixed_boundary_funcs.fixed_boundary_east = &fixed_boundary_east;
-    boundary_conditions->fixed_boundary_funcs.fixed_boundary_south = &fixed_boundary_south;
-    boundary_conditions->fixed_boundary_funcs.fixed_boundary_north = &fixed_boundary_north;
-    boundary_conditions->fixed_boundary_funcs.fixed_boundary_bottom = &fixed_boundary_bottom;
-    boundary_conditions->fixed_boundary_funcs.fixed_boundary_top = &fixed_boundary_top;
 
-    boundary_conditions->flux_boundary_funcs.flux_boundary_west = &flux_boundary_west;
-    boundary_conditions->flux_boundary_funcs.flux_boundary_east = &flux_boundary_east;
-    boundary_conditions->flux_boundary_funcs.flux_boundary_south = &flux_boundary_south;
-    boundary_conditions->flux_boundary_funcs.flux_boundary_north = &flux_boundary_north;
-    boundary_conditions->flux_boundary_funcs.flux_boundary_bottom = &flux_boundary_bottom;
-    boundary_conditions->flux_boundary_funcs.flux_boundary_top = &flux_boundary_top;
-
-    /*create array mappings*/
+    /* Create array mappings */
     boundary_type_t* boundary_type_map = boundary_type_mapper(boundary_type_faces);
     boundary_func_type_t* boundary_func_type_map = boundary_func_type_mapper();
     func_pointer* boundary_func_map = boundary_func_mapper(boundary_conditions);
 
+
+    /* Set boundary types */
+    boundary_conditions->boundary_type_faces = boundary_type_faces;
+
+
+    /* Set boundary functions */
     for(boundary_type = WEST; boundary_type <= TOP; boundary_type++)
     {
         boundary_func_map[boundary_type] = set_boundary_funcs(boundary_type_map[boundary_type],
@@ -97,6 +90,7 @@ static void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
 
     boundary_mapper(boundary_func_map,
                     boundary_conditions);
+
 
     /* Free array mappings */
     free(boundary_type_map);
