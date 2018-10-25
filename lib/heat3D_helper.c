@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 #include "../inc/memory_functions.h"
+#include "../inc/mappings.h"
 #include "../inc/user_types.h"
 
 
@@ -153,23 +154,21 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     double *xo, *r, **A;
     int nn;
     int i, j, k;
-    boundary_type_t west_boundary, east_boundary, south_boundary;
-    boundary_type_t north_boundary, bottom_boundary, top_boundary;
-    fixed_boundary_funcs_t fixed_boundary_funcs;
-    flux_boundary_funcs_t flux_boundary_funcs;
+    boundary_type_t wb_type, eb_type, sb_type;
+    boundary_type_t nb_type, bb_type, tb_type;
     boundary_funcs_t boundary_funcs;
 
-    /* Setting boundries and boundary types */
-    fixed_boundary_funcs = boundary_conditions.fixed_boundary_funcs;
-    flux_boundary_funcs  = boundary_conditions.flux_boundary_funcs;
-    boundary_funcs       = boundary_conditions.boundary_funcs;
 
-    west_boundary   = boundary_conditions.boundary_type_faces.west_boundary;
-    east_boundary   = boundary_conditions.boundary_type_faces.east_boundary;
-    south_boundary  = boundary_conditions.boundary_type_faces.south_boundary;
-    north_boundary  = boundary_conditions.boundary_type_faces.north_boundary;
-    bottom_boundary = boundary_conditions.boundary_type_faces.bottom_boundary;
-    top_boundary    = boundary_conditions.boundary_type_faces.top_boundary;
+    /* Setting boundries and boundary types */
+    boundary_funcs = boundary_conditions.boundary_funcs;
+
+    wb_type = boundary_conditions.boundary_type_faces.west_boundary;
+    eb_type = boundary_conditions.boundary_type_faces.east_boundary;
+    sb_type = boundary_conditions.boundary_type_faces.south_boundary;
+    nb_type = boundary_conditions.boundary_type_faces.north_boundary;
+    bb_type = boundary_conditions.boundary_type_faces.bottom_boundary;
+    tb_type = boundary_conditions.boundary_type_faces.top_boundary;
+
 
     /* Initializing parameters */
     t  = time_data.t;
@@ -191,17 +190,14 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     r  = kershaw_data->r;
     A  = kershaw_data->A;
 
-    /*setting switches*/
-    double west_boundary_switch;
 
-    if(west_boundary == DIRICHLET)
-    {
-        west_boundary_switch = 1.0;
-    }
-    else
-    {
-        west_boundary_switch = -1.0/(deltax * 2 * b1);
-    }
+    /* Setting switches */
+    double* wb_switch = boundary_switch_mapper(deltax * 2 * b1);
+    double* eb_switch = boundary_switch_mapper(deltax * 2 * b1);
+    double* sb_switch = boundary_switch_mapper(deltax * 2 * b2);
+    double* nb_switch = boundary_switch_mapper(deltax * 2 * b2);
+    double* bb_switch = boundary_switch_mapper(deltax * 2 * b3);
+    double* tb_switch = boundary_switch_mapper(deltax * 2 * b3);
 
 
     /* Generating vectorized coefficient matrix */
@@ -215,10 +211,10 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][2] = b2;
         A[nn][3] = b1;
         A[nn][4] = -2*b1 - 2*b2 - 2*b3 + K;
-        r[nn] = source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-               (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
-                A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx] +
-                b3*xo[nn+grid_size.nx*grid_size.ny]);
+        r[nn] = source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1]
+                + A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx]
+                + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating corner 1 coefficients
@@ -230,18 +226,13 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = 0;
         A[nn][2] = 0;
         A[nn][3] = 0;
-        A[nn][4] = -(b1 + 2*b1*west_boundary) - (b2 + 2*b2*south_boundary) - (b3 + 2*b3*bottom_boundary) + K;
-        r[nn] = -2*b1*west_boundary*fixed_boundary_funcs.fixed_boundary_west(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*south_boundary*fixed_boundary_funcs.fixed_boundary_south(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*bottom_boundary*fixed_boundary_funcs.fixed_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                (1-west_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-                (1-south_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_south(X[i][j][k], Z[i][j][k], t) +
-                (1-bottom_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx] +
-                 b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*wb_type) - (b2 + 2*b2*sb_type) - (b3 + 2*b3*bb_type) + K;
+        r[nn] = - 2*b1*wb_switch[wb_type]*boundary_funcs.boundary_west(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*sb_switch[sb_type]*boundary_funcs.boundary_south(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*bb_switch[bb_type]*boundary_funcs.boundary_bottom(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx] +
+                   b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating side a cofficients and source terms
@@ -253,15 +244,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = 0;
         A[nn][2] = 0;
         A[nn][3] = b1;
-        A[nn][4] = -2*b1 - (b2 + 2*b2*south_boundary) - (b3 + 2*b3*bottom_boundary) + K;
-        r[nn] = -2*b2*south_boundary*fixed_boundary_funcs.fixed_boundary_south(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*bottom_boundary*fixed_boundary_funcs.fixed_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                (1-south_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_south(X[i][j][k], Z[i][j][k], t) +
-                (1-bottom_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b1*xo[nn-1] + A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -2*b1 - (b2 + 2*b2*sb_type) - (b3 + 2*b3*bb_type) + K;
+        r[nn] = - 2*b2*sb_switch[sb_type]*boundary_funcs.boundary_south(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*bb_switch[bb_type]*boundary_funcs.boundary_bottom(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b1*xo[nn-1] + A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx] +
+                   b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating corner 2 coefficients and source terms
@@ -273,17 +261,13 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = 0;
         A[nn][2] = 0;
         A[nn][3] = b1;
-        A[nn][4] = -(b1 + 2*b1*east_boundary) - (b2 + 2*b2*south_boundary) - (b3 + 2*b3*bottom_boundary) + K;
-        r[nn] = -2*b1*east_boundary*fixed_boundary_funcs.fixed_boundary_east(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*south_boundary*fixed_boundary_funcs.fixed_boundary_south(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*bottom_boundary*fixed_boundary_funcs.fixed_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                (1-east_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-                (1-south_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_south(X[i][j][k], Z[i][j][k], t) +
-                (1-bottom_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b1*xo[nn-1] + A[nn][4]*xo[nn] + b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*eb_type) - (b2 + 2*b2*sb_type) - (b3 + 2*b3*bb_type) + K;
+        r[nn] = - 2*b1*eb_switch[eb_type]*boundary_funcs.boundary_east(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*sb_switch[sb_type]*boundary_funcs.boundary_south(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*bb_switch[bb_type]*boundary_funcs.boundary_bottom(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b1*xo[nn-1] + A[nn][4]*xo[nn] + b2*xo[nn+grid_size.nx] +
+                   b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating side d coefficients and source terms
@@ -295,16 +279,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = 0;
         A[nn][2] = b2;
         A[nn][3] = 0;
-        A[nn][4] = -(b1 + 2*b1*west_boundary) - 2*b2 - (b3 + 2*b3*bottom_boundary) + K;
-        r[nn] = -2*b1*west_boundary*fixed_boundary_funcs.fixed_boundary_west(Y[i][j][k], Z[i][j][k], t) -
-                 2*b3*bottom_boundary*fixed_boundary_funcs.fixed_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                (1-west_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-                (1-bottom_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx] +
-                 b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*wb_type) - 2*b2 - (b3 + 2*b3*bb_type) + K;
+        r[nn] = - 2*b1*wb_switch[wb_type]*boundary_funcs.boundary_west(Y[i][j][k], Z[i][j][k], t)
+                - 2*b3*bb_switch[bb_type]*boundary_funcs.boundary_bottom(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx] +
+                   b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating face E coefficients and source terms
@@ -316,14 +296,11 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = 0;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -2*b1 - 2*b2 - (b3 + 2*b3*bottom_boundary) + K;
-        r[nn] = -2*b3*bottom_boundary*fixed_boundary_funcs.fixed_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                (1-bottom_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b2*xo[nn-grid_size.nx] + b1*xo[nn-1] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
-                 b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -2*b1 - 2*b2 - (b3 + 2*b3*bb_type) + K;
+        r[nn] = - 2*b3*bb_switch[bb_type]*boundary_funcs.boundary_bottom(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b2*xo[nn-grid_size.nx] + b1*xo[nn-1] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
+                   b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating side b coefficients and source terms
@@ -335,16 +312,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = 0;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -(b1 + 2*b1*east_boundary) - 2*b2 - (b3 + 2*b3*bottom_boundary) + K;
-        r[nn] = -2*b1*east_boundary*fixed_boundary_funcs.fixed_boundary_east(Y[i][j][k], Z[i][j][k], t) -
-                 2*b3*bottom_boundary*fixed_boundary_funcs.fixed_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                (1-east_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-                (1-bottom_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b2*xo[nn-grid_size.nx] + b1*xo[nn-1] + A[nn][4]*xo[nn] + b2*xo[nn+grid_size.nx] +
-                 b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*eb_type) - 2*b2 - (b3 + 2*b3*bb_type) + K;
+        r[nn] = - 2*b1*eb_switch[eb_type]*boundary_funcs.boundary_east(Y[i][j][k], Z[i][j][k], t)
+                - 2*b3*bb_switch[bb_type]*boundary_funcs.boundary_bottom(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b2*xo[nn-grid_size.nx] + b1*xo[nn-1] + A[nn][4]*xo[nn] + b2*xo[nn+grid_size.nx] +
+                   b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating corner 4 coefficients and source terms
@@ -356,18 +329,13 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = 0;
         A[nn][2] = b2;
         A[nn][3] = 0;
-        A[nn][4] = -(b1 + 2*b1*west_boundary) - (b2 + 2*b2*north_boundary) - (b3 + 2*b3*bottom_boundary) + K;
-        r[nn] = -2*b1*west_boundary*fixed_boundary_funcs.fixed_boundary_west(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*north_boundary*fixed_boundary_funcs.fixed_boundary_north(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*bottom_boundary*fixed_boundary_funcs.fixed_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                (1-west_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-                (1-north_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_north(X[i][j][k], Z[i][j][k], t) +
-                (1-bottom_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
-                 b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*wb_type) - (b2 + 2*b2*nb_type) - (b3 + 2*b3*bb_type) + K;
+        r[nn] = - 2*b1*wb_switch[wb_type]*boundary_funcs.boundary_west(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*nb_switch[nb_type]*boundary_funcs.boundary_north(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*bb_switch[bb_type]*boundary_funcs.boundary_bottom(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
+                   b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating side c coefficients and source terms
@@ -379,16 +347,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = 0;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -2*b1 - (b2 + 2*b2*north_boundary) - (b3 + 2*b3*bottom_boundary) + K;
-        r[nn] = -2*b2*north_boundary*fixed_boundary_funcs.fixed_boundary_north(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*bottom_boundary*fixed_boundary_funcs.fixed_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                (1-north_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_north(X[i][j][k], Z[i][j][k], t) +
-                (1-bottom_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b2*xo[nn-grid_size.nx] + b1*xo[nn-1] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
-                 b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -2*b1 - (b2 + 2*b2*nb_type) - (b3 + 2*b3*bb_type) + K;
+        r[nn] = - 2*b2*nb_switch[nb_type]*boundary_funcs.boundary_north(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*bb_switch[bb_type]*boundary_funcs.boundary_bottom(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b2*xo[nn-grid_size.nx] + b1*xo[nn-1] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
+                   b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating corner 3 coefficients and source terms
@@ -400,18 +364,13 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = 0;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -(b1 + 2*b1*east_boundary) - (b2 + 2*b2*north_boundary) - (b3 + 2*b3*bottom_boundary) + K;
-        r[nn] = -2*b1*east_boundary*fixed_boundary_funcs.fixed_boundary_east(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*north_boundary*fixed_boundary_funcs.fixed_boundary_north(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*bottom_boundary*fixed_boundary_funcs.fixed_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                (1-east_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-                (1-north_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_north(X[i][j][k], Z[i][j][k], t) +
-                (1-bottom_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_bottom(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b2*xo[nn-grid_size.nx] + b1*xo[nn-1] + A[nn][4]*xo[nn] +
-                 b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*eb_type) - (b2 + 2*b2*nb_type) - (b3 + 2*b3*bb_type) + K;
+        r[nn] = - 2*b1*eb_switch[eb_type]*boundary_funcs.boundary_east(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*nb_switch[nb_type]*boundary_funcs.boundary_north(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*bb_switch[bb_type]*boundary_funcs.boundary_bottom(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b2*xo[nn-grid_size.nx] + b1*xo[nn-1] + A[nn][4]*xo[nn] +
+                   b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating side e coefficients and source terms
@@ -423,16 +382,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = 0;
         A[nn][3] = 0;
-        A[nn][4] = -(b1 + 2*b1*west_boundary) - (b2 + 2*b2*south_boundary) - 2*b3 + K;
-        r[nn] = -2*b1*west_boundary*fixed_boundary_funcs.fixed_boundary_west(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*south_boundary*fixed_boundary_funcs.fixed_boundary_south(X[i][j][k], Z[i][j][k], t) +
-
-                (1-west_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-                (1-south_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_south(X[i][j][k], Z[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
-                 b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*wb_type) - (b2 + 2*b2*sb_type) - 2*b3 + K;
+        r[nn] = - 2*b1*wb_switch[wb_type]*boundary_funcs.boundary_west(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*sb_switch[sb_type]*boundary_funcs.boundary_south(X[i][j][k], Z[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
+                   b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating face A coefficients and source terms
@@ -444,14 +399,11 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = 0;
         A[nn][3] = b1;
-        A[nn][4] = -2*b1 - (b2 + 2*b2*south_boundary) - 2*b3 + K;
-        r[nn] = -2*b2*south_boundary*fixed_boundary_funcs.fixed_boundary_south(X[i][j][k], Z[i][j][k], t) +
-
-                (1-south_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_south(X[i][j][k], Z[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b1*xo[nn-1] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
-                 b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -2*b1 - (b2 + 2*b2*sb_type) - 2*b3 + K;
+        r[nn] = - 2*b2*sb_switch[sb_type]*boundary_funcs.boundary_south(X[i][j][k], Z[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b1*xo[nn-1] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
+                   b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating side f coefficients and source terms
@@ -463,16 +415,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = 0;
         A[nn][3] = b1;
-        A[nn][4] = -(b1 + 2*b1*east_boundary) - (b2 + 2*b2*south_boundary) - 2*b3 + K;
-        r[nn] = -2*b1*east_boundary*fixed_boundary_funcs.fixed_boundary_east(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*south_boundary*fixed_boundary_funcs.fixed_boundary_south(X[i][j][k], Z[i][j][k], t) +
-
-                (1-east_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-                (1-south_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_south(X[i][j][k], Z[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b1*xo[nn-1] + A[nn][4]*xo[nn] +
-                 b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*eb_type) - (b2 + 2*b2*sb_type) - 2*b3 + K;
+        r[nn] = - 2*b1*eb_switch[eb_type]*boundary_funcs.boundary_east(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*sb_switch[sb_type]*boundary_funcs.boundary_south(X[i][j][k], Z[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b1*xo[nn-1] + A[nn][4]*xo[nn] +
+                   b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating face D coefficients and source terms
@@ -484,14 +432,11 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = 0;
-        A[nn][4] = -(b1 + 2*b1*west_boundary) - 2*b2 - 2*b3 + K;
-        r[nn] = -2*b1*west_boundary*fixed_boundary_funcs.fixed_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-
-                (1-west_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] +
-                 b1*xo[nn+1] + b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*wb_type) - 2*b2 - 2*b3 + K;
+        r[nn] = - 2*b1*wb_switch[wb_type]*boundary_funcs.boundary_west(Y[i][j][k], Z[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] +
+                   b1*xo[nn+1] + b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating face B coefficients and source terms
@@ -503,14 +448,11 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -(b1 + 2*b1*east_boundary) - 2*b2 - 2*b3 + K;
-        r[nn] = -2*b1*east_boundary*fixed_boundary_funcs.fixed_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-
-                (1-east_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
-                 A[nn][4]*xo[nn] + b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*eb_type) - 2*b2 - 2*b3 + K;
+        r[nn] = - 2*b1*eb_switch[eb_type]*boundary_funcs.boundary_east(Y[i][j][k], Z[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
+                   A[nn][4]*xo[nn] + b2*xo[nn+grid_size.nx] + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating side h coefficients and source terms
@@ -522,16 +464,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = 0;
-        A[nn][4] = -(b1 + 2*b1*west_boundary) - (b2 + 2*b2*north_boundary) - 2*b3 + K;
-        r[nn] = -2*b1*west_boundary*fixed_boundary_funcs.fixed_boundary_west(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*north_boundary*fixed_boundary_funcs.fixed_boundary_north(X[i][j][k], Z[i][j][k], t) +
-
-                (1-west_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-                (1-north_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_north(X[i][j][k], Z[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] +
-                 b1*xo[nn+1] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*wb_type) - (b2 + 2*b2*nb_type) - 2*b3 + K;
+        r[nn] = - 2*b1*wb_switch[wb_type]*boundary_funcs.boundary_west(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*nb_switch[nb_type]*boundary_funcs.boundary_north(X[i][j][k], Z[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] +
+                   b1*xo[nn+1] + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating face C coefficients and source terms
@@ -543,14 +481,11 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -2*b1 - (b2 + 2*b2*north_boundary) - 2*b3 + K;
-        r[nn] = -2*b2*north_boundary*fixed_boundary_funcs.fixed_boundary_north(X[i][j][k], Z[i][j][k], t) +
-
-                (1-north_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_north(X[i][j][k], Z[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
-                 A[nn][4]*xo[nn] + b1*xo[nn+1] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -2*b1 - (b2 + 2*b2*nb_type) - 2*b3 + K;
+        r[nn] = - 2*b2*nb_switch[nb_type]*boundary_funcs.boundary_north(X[i][j][k], Z[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
+                   A[nn][4]*xo[nn] + b1*xo[nn+1] + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating side g coefficients and source terms
@@ -562,16 +497,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -(b1 + 2*b1*east_boundary) - (b2 + 2*b2*north_boundary) - 2*b3 + K;
-        r[nn] = -2*b1*east_boundary*fixed_boundary_funcs.fixed_boundary_east(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*north_boundary*fixed_boundary_funcs.fixed_boundary_north(X[i][j][k], Z[i][j][k], t) +
-
-                (1-east_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-                (1-north_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_north(X[i][j][k], Z[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
-                 A[nn][4]*xo[nn] + b3*xo[nn+grid_size.nx*grid_size.ny]);
+        A[nn][4] = -(b1 + 2*b1*eb_type) - (b2 + 2*b2*nb_type) - 2*b3 + K;
+        r[nn] = - 2*b1*eb_switch[eb_type]*boundary_funcs.boundary_east(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*nb_switch[nb_type]*boundary_funcs.boundary_north(X[i][j][k], Z[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
+                   A[nn][4]*xo[nn] + b3*xo[nn+grid_size.nx*grid_size.ny]);
     }
 
     //Generating corner 5 coefficients and source terms
@@ -583,18 +514,13 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = 0;
         A[nn][3] = 0;
-        A[nn][4] = -(b1 + 2*b1*west_boundary) - (b2 + 2*b2*south_boundary) - (b3 + 2*b3*top_boundary) + K;
-        r[nn] = -2*b1*west_boundary*fixed_boundary_funcs.fixed_boundary_west(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*south_boundary*fixed_boundary_funcs.fixed_boundary_south(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*top_boundary*fixed_boundary_funcs.fixed_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                (1-west_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-                (1-south_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_south(X[i][j][k], Z[i][j][k], t) +
-                (1-top_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
-                 b2*xo[nn+grid_size.nx]);
+        A[nn][4] = -(b1 + 2*b1*wb_type) - (b2 + 2*b2*sb_type) - (b3 + 2*b3*tb_type) + K;
+        r[nn] = - 2*b1*wb_switch[wb_type]*boundary_funcs.boundary_west(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*sb_switch[sb_type]*boundary_funcs.boundary_south(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*tb_switch[tb_type]*boundary_funcs.boundary_top(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + A[nn][4]*xo[nn] + b1*xo[nn+1] +
+                   b2*xo[nn+grid_size.nx]);
     }
 
     //Generating side i coefficients and source terms
@@ -606,16 +532,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = 0;
         A[nn][3] = b1;
-        A[nn][4] = -2*b1 - (b2 + 2*b2*south_boundary) - (b3 + 2*b3*top_boundary) + K;
-        r[nn] = -2*b2*south_boundary*fixed_boundary_funcs.fixed_boundary_south(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*top_boundary*fixed_boundary_funcs.fixed_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                (1-south_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_south(X[i][j][k], Z[i][j][k], t) +
-                (1-top_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b1*xo[nn-1] + A[nn][4]*xo[nn] +
-                 b1*xo[nn+1] + b2*xo[nn+grid_size.nx]);
+        A[nn][4] = -2*b1 - (b2 + 2*b2*sb_type) - (b3 + 2*b3*tb_type) + K;
+        r[nn] = - 2*b2*sb_switch[sb_type]*boundary_funcs.boundary_south(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*tb_switch[tb_type]*boundary_funcs.boundary_top(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b1*xo[nn-1] + A[nn][4]*xo[nn] +
+                   b1*xo[nn+1] + b2*xo[nn+grid_size.nx]);
     }
 
     //Generating corner 6 coefficients and source terms
@@ -627,18 +549,13 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = 0;
         A[nn][3] = b1;
-        A[nn][4] = -(b1 + 2*b1*east_boundary) - (b2 + 2*b2*south_boundary) - (b3 + 2*b3*top_boundary) + K;
-        r[nn] = -2*b1*east_boundary*fixed_boundary_funcs.fixed_boundary_east(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*south_boundary*fixed_boundary_funcs.fixed_boundary_south(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*top_boundary*fixed_boundary_funcs.fixed_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                (1-east_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-                (1-south_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_south(X[i][j][k], Z[i][j][k], t) +
-                (1-top_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b1*xo[nn-1] + A[nn][4]*xo[nn] +
-                 b2*xo[nn+grid_size.nx]);
+        A[nn][4] = -(b1 + 2*b1*eb_type) - (b2 + 2*b2*sb_type) - (b3 + 2*b3*tb_type) + K;
+        r[nn] = - 2*b1*eb_switch[eb_type]*boundary_funcs.boundary_east(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*sb_switch[sb_type]*boundary_funcs.boundary_south(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*tb_switch[tb_type]*boundary_funcs.boundary_top(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b1*xo[nn-1] + A[nn][4]*xo[nn] +
+                   b2*xo[nn+grid_size.nx]);
     }
 
     //Generating side l coefficients and source terms
@@ -650,16 +567,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = 0;
-        A[nn][4] = -(b1 + 2*b1*west_boundary) - 2*b2 - (b3 + 2*b3*top_boundary) + K;
-        r[nn] = -2*b1*west_boundary*fixed_boundary_funcs.fixed_boundary_west(Y[i][j][k], Z[i][j][k], t) -
-                 2*b3*top_boundary*fixed_boundary_funcs.fixed_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                (1-west_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-                (1-top_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] +
-                 b1*xo[nn+1] + b2*xo[nn+grid_size.nx]);
+        A[nn][4] = -(b1 + 2*b1*wb_type) - 2*b2 - (b3 + 2*b3*tb_type) + K;
+        r[nn] = - 2*b1*wb_switch[wb_type]*boundary_funcs.boundary_west(Y[i][j][k], Z[i][j][k], t)
+                - 2*b3*tb_switch[tb_type]*boundary_funcs.boundary_top(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] +
+                   b1*xo[nn+1] + b2*xo[nn+grid_size.nx]);
     }
 
     //Generating face F coefficients and source terms
@@ -671,14 +584,11 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -2*b1 - 2*b2 - (b3 + 2*b3*top_boundary) + K;
-        r[nn] = -2*b3*top_boundary*fixed_boundary_funcs.fixed_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                (1-top_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
-                 A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx]);
+        A[nn][4] = -2*b1 - 2*b2 - (b3 + 2*b3*tb_type) + K;
+        r[nn] = - 2*b3*tb_switch[tb_type]*boundary_funcs.boundary_top(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
+                   A[nn][4]*xo[nn] + b1*xo[nn+1] + b2*xo[nn+grid_size.nx]);
     }
 
     //Generating side j coefficients and source terms
@@ -690,16 +600,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -(b1 + 2*b1*east_boundary) - 2*b2 - (b3 + 2*b3*top_boundary) + K;
-        r[nn] = -2*b1*east_boundary*fixed_boundary_funcs.fixed_boundary_east(Y[i][j][k], Z[i][j][k], t) -
-                 2*b3*top_boundary*fixed_boundary_funcs.fixed_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                (1-east_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-                (1-top_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
-                 A[nn][4]*xo[nn] + b2*xo[nn+grid_size.nx]);
+        A[nn][4] = -(b1 + 2*b1*eb_type) - 2*b2 - (b3 + 2*b3*tb_type) + K;
+        r[nn] = - 2*b1*eb_switch[eb_type]*boundary_funcs.boundary_east(Y[i][j][k], Z[i][j][k], t)
+                - 2*b3*tb_switch[tb_type]*boundary_funcs.boundary_top(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
+                   A[nn][4]*xo[nn] + b2*xo[nn+grid_size.nx]);
     }
 
     //Generating corner 8 coefficients and source terms
@@ -711,18 +617,13 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = 0;
-        A[nn][4] = -(b1 + 2*b1*west_boundary) - (b2 + 2*b2*north_boundary) - (b3 + 2*b3*top_boundary) + K;
-        r[nn] = -2*b1*west_boundary*fixed_boundary_funcs.fixed_boundary_west(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*north_boundary*fixed_boundary_funcs.fixed_boundary_north(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*top_boundary*fixed_boundary_funcs.fixed_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                (1-west_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_west(Y[i][j][k], Z[i][j][k], t) +
-                (1-north_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_north(X[i][j][k], Z[i][j][k], t) +
-                (1-top_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] +
-                 b1*xo[nn+1]);
+        A[nn][4] = -(b1 + 2*b1*wb_type) - (b2 + 2*b2*nb_type) - (b3 + 2*b3*tb_type) + K;
+        r[nn] = - 2*b1*wb_switch[wb_type]*boundary_funcs.boundary_west(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*nb_switch[nb_type]*boundary_funcs.boundary_north(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*tb_switch[tb_type]*boundary_funcs.boundary_top(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + A[nn][4]*xo[nn] +
+                   b1*xo[nn+1]);
     }
 
     //Generating side k coefficients and source terms
@@ -734,16 +635,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -2*b1 - (b2 + 2*b2*north_boundary) - (b3 + 2*b3*top_boundary) + K;
-        r[nn] = -2*b2*north_boundary*fixed_boundary_funcs.fixed_boundary_north(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*top_boundary*fixed_boundary_funcs.fixed_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                (1-north_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_north(X[i][j][k], Z[i][j][k], t) +
-                (1-top_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
-                 A[nn][4]*xo[nn] + b1*xo[nn+1]);
+        A[nn][4] = -2*b1 - (b2 + 2*b2*nb_type) - (b3 + 2*b3*tb_type) + K;
+        r[nn] = - 2*b2*nb_switch[nb_type]*boundary_funcs.boundary_north(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*tb_switch[tb_type]*boundary_funcs.boundary_top(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
+                   A[nn][4]*xo[nn] + b1*xo[nn+1]);
     }
 
     //Generating corner 7 coefficients and source terms
@@ -755,18 +652,13 @@ void generate_coefficient_matrix(domain_size_t domain_size,
         A[nn][1] = b3;
         A[nn][2] = b2;
         A[nn][3] = b1;
-        A[nn][4] = -(b1 + 2*b1*east_boundary) - (b2 + 2*b2*north_boundary) - (b3 + 2*b3*top_boundary) + K;
-        r[nn] = -2*b1*east_boundary*fixed_boundary_funcs.fixed_boundary_east(Y[i][j][k], Z[i][j][k], t) -
-                 2*b2*north_boundary*fixed_boundary_funcs.fixed_boundary_north(X[i][j][k], Z[i][j][k], t) -
-                 2*b3*top_boundary*fixed_boundary_funcs.fixed_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                (1-east_boundary)*(1.0/deltax)*flux_boundary_funcs.flux_boundary_east(Y[i][j][k], Z[i][j][k], t) +
-                (1-north_boundary)*(1.0/deltay)*flux_boundary_funcs.flux_boundary_north(X[i][j][k], Z[i][j][k], t) +
-                (1-top_boundary)*(1.0/deltaz)*flux_boundary_funcs.flux_boundary_top(X[i][j][k], Y[i][j][k], t) +
-
-                 source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn] -
-                (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
-                 A[nn][4]*xo[nn]);
+        A[nn][4] = -(b1 + 2*b1*eb_type) - (b2 + 2*b2*nb_type) - (b3 + 2*b3*tb_type) + K;
+        r[nn] = - 2*b1*eb_switch[eb_type]*boundary_funcs.boundary_east(Y[i][j][k], Z[i][j][k], t)
+                - 2*b2*nb_switch[nb_type]*boundary_funcs.boundary_north(X[i][j][k], Z[i][j][k], t)
+                - 2*b3*tb_switch[tb_type]*boundary_funcs.boundary_top(X[i][j][k], Y[i][j][k], t)
+                + source(X[i][j][k], Y[i][j][k], Z[i][j][k], t) + K*xo[nn]
+                - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
+                   A[nn][4]*xo[nn]);
     }
 
 }

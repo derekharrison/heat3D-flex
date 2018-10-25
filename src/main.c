@@ -21,281 +21,7 @@
 #include "../inc/memory_functions.h"
 #include "../inc/user_types.h"
 #include "../inc/mappings.h"
-
-/*-----------------------------------------------------------------------------------------------*/
-static double fixed_boundary_west(double y, double z, double t)
-{
-    /*
-     * Specify the west face temperature distribution for the transient heat conduction equation
-     * The distribution is of the form f(y,z,t).
-     *
-     * input    y
-     * input    z
-     * input    t
-     *
-     * return   temperature_west
-     */
-
-    double temperature_west = 1.0;
-
-    return temperature_west;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double fixed_boundary_east(double y, double z, double t)
-{
-    /*
-     * Specify the east face temperature distribution for the transient heat conduction equation
-     * The distribution is of the form f(y,z,t).
-     *
-     * input    y
-     * input    z
-     * input    t
-     *
-     * return   temperature_east
-     */
-
-    double temperature_east = 2.0;
-
-    return temperature_east;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double fixed_boundary_south(double x,double z, double t)
-{
-    /*
-     * Specify the south face temperature distribution for the transient heat conduction equation
-     * The distribution is of the form f(x,z,t).
-     *
-     * input    x
-     * input    z
-     * input    t
-     *
-     * return   temperature_south
-     */
-
-    double temperature_south = 3.0;
-
-    return temperature_south;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double fixed_boundary_north(double x,double z, double t)
-{
-    /*
-     * Specify the north face temperature distribution for the transient heat conduction equation
-     * The distribution is of the form f(x,z,t).
-     *
-     * input    x
-     * input    z
-     * input    t
-     *
-     * return   temperature_north
-     */
-
-    double temperature_north = 0.5;
-
-    return temperature_north;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double fixed_boundary_bottom(double x,double y, double t)
-{
-    /*
-     * Specify the bottom face temperature distribution for the transient heat conduction equation
-     * The distribution is of the form f(x,y,t).
-     *
-     * input    x
-     * input    y
-     * input    t
-     *
-     * return   temperature_bottom
-     */
-
-    double temperature_bottom = 1.3;
-
-    return temperature_bottom;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double fixed_boundary_top(double x,double y, double t)
-{
-    /*
-     * Specify the top face temperature distribution for the transient heat conduction equation
-     * The distribution is of the form f(x,y,t).
-     *
-     * input    x
-     * input    y
-     * input    t
-     *
-     * return   temperature_top
-     */
-
-    double temperature_top = 2.1;
-
-    return temperature_top;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double flux_boundary_west(double y, double z, double t)
-{
-    /*
-     * Specify the west face flux equation for the transient heat conduction equation
-     * The flux equation is of the form f(y,z,t).
-     *
-     * input    y
-     * input    z
-     * input    t
-     *
-     * return   flux_west
-     */
-
-    double flux_west = 800.0;
-
-    return flux_west;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double flux_boundary_east(double y, double z, double t)
-{
-    /*
-     * Specify the east face flux equation for the transient heat conduction equation
-     * The flux equation is of the form f(y,z,t).
-     *
-     * input    x
-     * input    y
-     * input    t
-     *
-     * return   flux_east
-     */
-
-    double flux_east = 800.0;
-
-    return flux_east;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double flux_boundary_south(double x,double z, double t)
-{
-    /*
-     * Specify the south face flux equation for the transient heat conduction equation
-     * The flux equation is of the form f(x,z,t).
-     *
-     * input    x
-     * input    y
-     * input    t
-     *
-     * return   flux_south
-     */
-
-    double flux_south = 800.0;
-
-    return flux_south;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double flux_boundary_north(double x,double z, double t)
-{
-    /*
-     * Specify the north face flux equation for the transient heat conduction equation
-     * The flux equation is of the form f(x,z,t).
-     *
-     * input    x
-     * input    y
-     * input    t
-     *
-     * return   flux_north
-     */
-
-    double flux_north = 800.0;
-
-    return flux_north;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double flux_boundary_bottom(double x,double y, double t)
-{
-    /*
-     * Specify the bottom face flux equation for the transient heat conduction equation
-     * The flux equation is of the form f(x,y,t).
-     *
-     * input    x
-     * input    y
-     * input    t
-     *
-     * return   flux_bottom
-     */
-
-    double flux_bottom = 800.0;
-
-    return flux_bottom;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double flux_boundary_top(double x,double y, double t)
-{
-    /*
-     * Specify the top face flux equation for the transient heat conduction equation
-     * The flux equation is of the form f(x,y,t).
-     *
-     * input    x
-     * input    z
-     * input    t
-     *
-     * return   flux_top
-     */
-
-    double flux_top = 800.0;
-
-    return flux_top;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static double source_equation(double x, double y, double z, double t)
-{
-    /*
-     * Specify the source equation for the transient heat conduction equation:
-     *
-     * gammax*d2T/dx2 + gammay*d2T/dy2 + gammaz*d2T/dz2 + q(x,y,z,t) = rho*Cp*dT/dt
-     *
-     * The source equation is of the form q(x,y,z,t).
-     *
-     * input    x
-     * input    y
-     * input    z
-     *
-     * return   q
-     */
-
-    double q = 100.0;
-
-    return q;
-
-}
+#include "../inc/boundary_functions.h"
 
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -340,6 +66,8 @@ static void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
      * output   boundary_conditions
      */
 
+    int boundary_type;
+
     boundary_conditions->boundary_type_faces = boundary_type_faces;
     boundary_conditions->fixed_boundary_funcs.fixed_boundary_west = &fixed_boundary_west;
     boundary_conditions->fixed_boundary_funcs.fixed_boundary_east = &fixed_boundary_east;
@@ -357,30 +85,23 @@ static void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
 
     /*create array mappings*/
     boundary_type_t* boundary_type_map = boundary_type_mapper(boundary_type_faces);
-
-    boundary_func_type_t* boundary_func_type_map = malloc(sizeof(boundary_func_type_t) * N_BOUNDARIES);
-    boundary_func_type_map[WEST].fixed_boundary = &fixed_boundary_west;
-    boundary_func_type_map[WEST].flux_boundary = &flux_boundary_west;
-    boundary_func_type_map[EAST].fixed_boundary = &fixed_boundary_east;
-    boundary_func_type_map[EAST].flux_boundary = &flux_boundary_east;
-    boundary_func_type_map[SOUTH].fixed_boundary = &fixed_boundary_south;
-    boundary_func_type_map[SOUTH].flux_boundary = &flux_boundary_south;
-    boundary_func_type_map[NORTH].fixed_boundary = &fixed_boundary_north;
-    boundary_func_type_map[NORTH].flux_boundary = &flux_boundary_north;
-    boundary_func_type_map[BOTTOM].fixed_boundary = &fixed_boundary_bottom;
-    boundary_func_type_map[BOTTOM].flux_boundary = &flux_boundary_bottom;
-    boundary_func_type_map[TOP].fixed_boundary = &fixed_boundary_top;
-    boundary_func_type_map[TOP].flux_boundary = &flux_boundary_top;
-
+    boundary_func_type_t* boundary_func_type_map = boundary_func_type_mapper();
     func_pointer* boundary_func_map = boundary_func_mapper(boundary_conditions);
 
-
-    boundary_func_map[TOP] = set_boundary_funcs(boundary_type_map[TOP],
-                                                boundary_func_type_map[TOP].fixed_boundary,
-                                                boundary_func_type_map[TOP].flux_boundary);
+    for(boundary_type = WEST; boundary_type <= TOP; boundary_type++)
+    {
+        boundary_func_map[boundary_type] = set_boundary_funcs(boundary_type_map[boundary_type],
+                                                              boundary_func_type_map[boundary_type].fixed_boundary,
+                                                              boundary_func_type_map[boundary_type].flux_boundary);
+    }
 
     boundary_mapper(boundary_func_map,
                     boundary_conditions);
+
+    /* Free array mappings */
+    free(boundary_type_map);
+    free(boundary_func_type_map);
+    free(boundary_func_map);
 
 }
 
@@ -437,8 +158,6 @@ int main(int argc, char *argv[])
     set_boundary_conditions(boundary_type_faces,
                             &boundary_conditions);
 
-    double test = boundary_conditions.boundary_funcs.boundary_top(1.0,1.0,1.0);
-    printf("testing pointer: %f\n", test);
 
     /* Calling 3D heat conduction solver */
     heat3D(domain_size,

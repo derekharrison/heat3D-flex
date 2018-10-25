@@ -8,18 +8,30 @@
 
 #include <stdlib.h>
 
+#include "../inc/boundary_functions.h"
 #include "../inc/user_types.h"
+
+
+/*-----------------------------------------------------------------------------------------------*/
+double* boundary_switch_mapper(double den)
+{
+    double* boundary_switch = malloc(sizeof(double) * 2);
+    boundary_switch[NEUMANN] = -1.0/den;
+    boundary_switch[DIRICHLET] = 1.0;
+
+    return boundary_switch;
+}
 
 
 /*-----------------------------------------------------------------------------------------------*/
 boundary_type_t* boundary_type_mapper(boundary_type_faces_t boundary_type_faces)
 {
     /*
-     * Create boundary type mapping
+     * Create boundary type map
      *
      * input    boundary_type_faces
      *
-     * return    m
+     * return   boundary_type_map
      */
 
     boundary_type_t* boundary_type_map = malloc(sizeof(boundary_type_t) * N_BOUNDARIES);
@@ -34,11 +46,41 @@ boundary_type_t* boundary_type_mapper(boundary_type_faces_t boundary_type_faces)
 
 }
 
+
+/*-----------------------------------------------------------------------------------------------*/
+boundary_func_type_t* boundary_func_type_mapper()
+{
+    /*
+     * Create boundary function type map
+     *
+     * input    boundary_type_faces
+     *
+     * return   boundary_func_type_map
+     */
+
+    boundary_func_type_t* boundary_func_type_map = malloc(sizeof(boundary_func_type_t) * N_BOUNDARIES);
+    boundary_func_type_map[WEST].fixed_boundary = &fixed_boundary_west;
+    boundary_func_type_map[WEST].flux_boundary = &flux_boundary_west;
+    boundary_func_type_map[EAST].fixed_boundary = &fixed_boundary_east;
+    boundary_func_type_map[EAST].flux_boundary = &flux_boundary_east;
+    boundary_func_type_map[SOUTH].fixed_boundary = &fixed_boundary_south;
+    boundary_func_type_map[SOUTH].flux_boundary = &flux_boundary_south;
+    boundary_func_type_map[NORTH].fixed_boundary = &fixed_boundary_north;
+    boundary_func_type_map[NORTH].flux_boundary = &flux_boundary_north;
+    boundary_func_type_map[BOTTOM].fixed_boundary = &fixed_boundary_bottom;
+    boundary_func_type_map[BOTTOM].flux_boundary = &flux_boundary_bottom;
+    boundary_func_type_map[TOP].fixed_boundary = &fixed_boundary_top;
+    boundary_func_type_map[TOP].flux_boundary = &flux_boundary_top;
+
+    return boundary_func_type_map;
+}
+
+
 /*-----------------------------------------------------------------------------------------------*/
 func_pointer* boundary_func_mapper(boundary_conditions_t* boundary_conditions)
 {
     /*
-     * Create boundary func mapping
+     * Create boundary function map
      *
      * input    boundary_conditions
      *
@@ -62,7 +104,7 @@ void boundary_mapper(func_pointer* boundary_map,
                      boundary_conditions_t* boundary_conditions)
 {
     /*
-     * Create boundary mapping
+     * Create boundary map
      *
      * input    boundary_map
      * output   boundary_conditions
