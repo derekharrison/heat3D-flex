@@ -299,10 +299,9 @@ static double source_equation(double x, double y, double z, double t)
 
 
 /*-----------------------------------------------------------------------------------------------*/
-static void set_boundary_funcs(boundary_type_t boundary_type,
-                               double (*boundary_func_fixed) (double x1, double x2, double t),
-                               double (*boundary_func_flux) (double x1, double x2, double t),
-                               double (*boundary_func) (double x1, double x2, double t))
+static func_pointer set_boundary_funcs(boundary_type_t boundary_type,
+                                       func_pointer boundary_func_fixed,
+                                       func_pointer boundary_func_flux)
 {
     /*
      * Set boundary function types for faces
@@ -310,8 +309,11 @@ static void set_boundary_funcs(boundary_type_t boundary_type,
      * input    boundary_type
      * input    boundary_func_fixed
      * input    boundary_func_flux
-     * output   boundary_func
+     *
+     * return   boundary_func
      */
+
+    func_pointer boundary_func;
 
     if(boundary_type == DIRICHLET)
     {
@@ -321,6 +323,8 @@ static void set_boundary_funcs(boundary_type_t boundary_type,
     {
         boundary_func = boundary_func_flux;
     }
+
+    return boundary_func;
 
 }
 
@@ -352,65 +356,31 @@ static void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
     boundary_conditions->flux_boundary_funcs.flux_boundary_top = &flux_boundary_top;
 
     /*create array mappings*/
-    boundary_type_t* boundary_type_map = malloc(sizeof(boundary_type_t) * N_BOUNDARIES);
-    boundary_type_map[WEST] = boundary_type_faces.west_boundary;
-    boundary_type_map[EAST] = boundary_type_faces.east_boundary;
-    boundary_type_map[SOUTH] = boundary_type_faces.south_boundary;
-    boundary_type_map[NORTH] = boundary_type_faces.north_boundary;
-    boundary_type_map[BOTTOM] = boundary_type_faces.bottom_boundary;
-    boundary_type_map[TOP] = boundary_type_faces.top_boundary;
+    boundary_type_t* boundary_type_map = boundary_type_mapper(boundary_type_faces);
 
-    boundary_func_type_t* boundary_func_map = malloc(sizeof(boundary_func_type_t) * N_BOUNDARIES);
-    boundary_func_map[WEST].fixed_boundary = &fixed_boundary_west;
-    boundary_func_map[WEST].fixed_boundary = &flux_boundary_west;
-    boundary_func_map[EAST].fixed_boundary = &fixed_boundary_east;
-    boundary_func_map[EAST].fixed_boundary = &flux_boundary_east;
-    boundary_func_map[SOUTH].fixed_boundary = &fixed_boundary_south;
-    boundary_func_map[SOUTH].fixed_boundary = &flux_boundary_south;
-    boundary_func_map[NORTH].fixed_boundary = &fixed_boundary_north;
-    boundary_func_map[NORTH].fixed_boundary = &flux_boundary_north;
-    boundary_func_map[BOTTOM].fixed_boundary = &fixed_boundary_bottom;
-    boundary_func_map[BOTTOM].fixed_boundary = &flux_boundary_bottom;
-    boundary_func_map[TOP].fixed_boundary = &fixed_boundary_top;
-    boundary_func_map[TOP].fixed_boundary = &flux_boundary_top;
+    boundary_func_type_t* boundary_func_type_map = malloc(sizeof(boundary_func_type_t) * N_BOUNDARIES);
+    boundary_func_type_map[WEST].fixed_boundary = &fixed_boundary_west;
+    boundary_func_type_map[WEST].flux_boundary = &flux_boundary_west;
+    boundary_func_type_map[EAST].fixed_boundary = &fixed_boundary_east;
+    boundary_func_type_map[EAST].flux_boundary = &flux_boundary_east;
+    boundary_func_type_map[SOUTH].fixed_boundary = &fixed_boundary_south;
+    boundary_func_type_map[SOUTH].flux_boundary = &flux_boundary_south;
+    boundary_func_type_map[NORTH].fixed_boundary = &fixed_boundary_north;
+    boundary_func_type_map[NORTH].flux_boundary = &flux_boundary_north;
+    boundary_func_type_map[BOTTOM].fixed_boundary = &fixed_boundary_bottom;
+    boundary_func_type_map[BOTTOM].flux_boundary = &flux_boundary_bottom;
+    boundary_func_type_map[TOP].fixed_boundary = &fixed_boundary_top;
+    boundary_func_type_map[TOP].flux_boundary = &flux_boundary_top;
 
-    func_pointer* boundary_map = malloc(sizeof(func_pointer) * N_BOUNDARIES);
-    boundary_map[WEST] = boundary_conditions->boundary_funcs.boundary_west;
-    boundary_map[EAST] = boundary_conditions->boundary_funcs.boundary_east;
-    boundary_map[SOUTH] = boundary_conditions->boundary_funcs.boundary_south;
-    boundary_map[NORTH] = boundary_conditions->boundary_funcs.boundary_north;
-    boundary_map[BOTTOM] = boundary_conditions->boundary_funcs.boundary_bottom;
-    boundary_map[TOP] = boundary_conditions->boundary_funcs.boundary_top;
+    func_pointer* boundary_func_map = boundary_func_mapper(boundary_conditions);
 
-    set_boundary_funcs(boundary_type_faces.west_boundary,
-                       &fixed_boundary_west,
-                       &flux_boundary_west,
-                       boundary_conditions->boundary_funcs.boundary_west);
 
-    set_boundary_funcs(boundary_type_faces.east_boundary,
-                       &fixed_boundary_east,
-                       &flux_boundary_east,
-                       boundary_conditions->boundary_funcs.boundary_east);
+    boundary_func_map[TOP] = set_boundary_funcs(boundary_type_map[TOP],
+                                                boundary_func_type_map[TOP].fixed_boundary,
+                                                boundary_func_type_map[TOP].flux_boundary);
 
-    set_boundary_funcs(boundary_type_faces.south_boundary,
-                       &fixed_boundary_south,
-                       &flux_boundary_south,
-                       boundary_conditions->boundary_funcs.boundary_south);
-
-    set_boundary_funcs(boundary_type_faces.north_boundary,
-                       &fixed_boundary_north,
-                       &flux_boundary_north,
-                       boundary_conditions->boundary_funcs.boundary_north);
-
-    set_boundary_funcs(boundary_type_faces.bottom_boundary,
-                       &fixed_boundary_bottom,
-                       &flux_boundary_bottom,
-                       boundary_conditions->boundary_funcs.boundary_bottom);
-
-    set_boundary_funcs(boundary_type_faces.top_boundary,
-                       &fixed_boundary_top,
-                       &flux_boundary_top,
-                       boundary_conditions->boundary_funcs.boundary_top);
+    boundary_mapper(boundary_func_map,
+                    boundary_conditions);
 
 }
 
@@ -467,6 +437,8 @@ int main(int argc, char *argv[])
     set_boundary_conditions(boundary_type_faces,
                             &boundary_conditions);
 
+    double test = boundary_conditions.boundary_funcs.boundary_top(1.0,1.0,1.0);
+    printf("testing pointer: %f\n", test);
 
     /* Calling 3D heat conduction solver */
     heat3D(domain_size,

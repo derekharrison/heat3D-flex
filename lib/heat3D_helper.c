@@ -157,10 +157,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     boundary_type_t north_boundary, bottom_boundary, top_boundary;
     fixed_boundary_funcs_t fixed_boundary_funcs;
     flux_boundary_funcs_t flux_boundary_funcs;
+    boundary_funcs_t boundary_funcs;
 
     /* Setting boundries and boundary types */
     fixed_boundary_funcs = boundary_conditions.fixed_boundary_funcs;
     flux_boundary_funcs  = boundary_conditions.flux_boundary_funcs;
+    boundary_funcs       = boundary_conditions.boundary_funcs;
 
     west_boundary   = boundary_conditions.boundary_type_faces.west_boundary;
     east_boundary   = boundary_conditions.boundary_type_faces.east_boundary;
@@ -188,6 +190,19 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     xo = kershaw_data->x;
     r  = kershaw_data->r;
     A  = kershaw_data->A;
+
+    /*setting switches*/
+    double west_boundary_switch;
+
+    if(west_boundary == DIRICHLET)
+    {
+        west_boundary_switch = 1.0;
+    }
+    else
+    {
+        west_boundary_switch = -1.0/(deltax * 2 * b1);
+    }
+
 
     /* Generating vectorized coefficient matrix */
     //Generating central coefficients and source terms
