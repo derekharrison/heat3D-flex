@@ -19,7 +19,7 @@
 void heat3D(domain_size_t domain_size,
             grid_size_t grid_size,
             boundary_conditions_t boundary_conditions,
-            time_dep_input_t time_dep_input,
+            time_data_t time_data,
             gammas_t gammas,
             double (*source)(double x,double y,double z,double t),
             grid_coordinates_t* grid_coordinates,
@@ -49,7 +49,7 @@ void heat3D(domain_size_t domain_size,
      * input     domain_size
      * input     grid_size
      * input     boundary_conditions
-     * input     time_dep_input
+     * input     time_data
      * input     gammas
      * input     source()
      * output    grid_coordinates
@@ -67,14 +67,14 @@ void heat3D(domain_size_t domain_size,
 
     /*Initialize data*/
     initialize_temperature_field(grid_size,
-                                 time_dep_input,
+                                 time_data,
                                  kershaw_data->x);
 
     generate_grid_coordinates(domain_size,
                               grid_size,
                               grid_coordinates);
 
-    initialize_time_data(time_dep_input);
+    initialize_time_data(time_data);
 
 
     /*Execute kershaw algorithm*/
@@ -85,7 +85,7 @@ void heat3D(domain_size_t domain_size,
         generate_coefficient_matrix(domain_size,
                                     grid_size,
                                     boundary_conditions,
-                                    time_dep_input,
+                                    time_data,
                                     gammas,
                                     source,
                                     grid_coordinates,
@@ -97,10 +97,10 @@ void heat3D(domain_size_t domain_size,
         execute_kershaw_algorithm(grid_size,
                                   kershaw_data);
 
-        time_dep_input.t = time_dep_input.t + time_dep_input.dt;
-        time_dep_input.current_timestep++;
+        time_data.t = time_data.t + time_data.dt;
+        time_data.current_timestep++;
 
-    }while (time_dep_input.current_timestep < time_dep_input.timesteps);
+    }while (time_data.current_timestep < time_data.timesteps);
 
 
     /*process results*/

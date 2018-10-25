@@ -14,7 +14,7 @@
 void heat3D(domain_size_t domain_size,
             grid_size_t grid_size,
             boundary_conditions_t boundary_conditions,
-            time_dep_input_t time_dep_input,
+            time_data_t time_data,
             gammas_t gammas,
             double (*source)(double x,double y,double z,double t),
             grid_coordinates_t* grid_coordinates,

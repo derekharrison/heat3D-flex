@@ -331,7 +331,7 @@ int main(int argc, char *argv[])
     bool                           exportData = FALSE;
     domain_size_t                 domain_size = {0};
     grid_size_t                     grid_size = {0};
-    time_dep_input_t           time_dep_input = {0};
+    time_data_t                     time_data = {0};
     gammas_t                           gammas = {0};
     grid_coordinates_t*      grid_coordinates = NULL;
     double***                               T = NULL;
@@ -348,12 +348,12 @@ int main(int argc, char *argv[])
     grid_size.ny = 5;                                   //amount of nodes along y coordinate
     grid_size.nz = 6;                                   //amount of nodes along z coordinate
 
-    time_dep_input.timesteps = 100;                     //number of timesteps
-    time_dep_input.ti        = 0.0;                     //initial time
-    time_dep_input.tf        = 0.1;                     //final time
-    time_dep_input.rho       = 3.0;                     //density
-    time_dep_input.Cp        = 10.0;                     //heat capacity
-    time_dep_input.Tinitial  = 10.0;                    //inital temperature of system
+    time_data.timesteps = 100;                          //number of timesteps
+    time_data.ti        = 0.0;                          //initial time
+    time_data.tf        = 0.1;                          //final time
+    time_data.rho       = 3.0;                          //density
+    time_data.Cp        = 10.0;                         //heat capacity
+    time_data.Tinitial  = 10.0;                         //inital temperature of system
 
     gammas.gammax = 15.1;                                //conductivity along x coordinate
     gammas.gammay = 15.1;                                //conductivity along y coordinate
@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
     heat3D(domain_size,
            grid_size,
            boundary_conditions,
-           time_dep_input,
+           time_data,
            gammas,
            &source_equation,
            grid_coordinates,

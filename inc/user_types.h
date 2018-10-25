@@ -41,7 +41,7 @@ typedef struct grid_coordinates_t {
     double*** Z;
 } grid_coordinates_t;
 
-typedef struct time_dep_input_t {
+typedef struct time_data_t {
     int timesteps;
     int current_timestep;
     double ti;
@@ -51,7 +51,7 @@ typedef struct time_dep_input_t {
     double Tinitial;
     double t;
     double dt;
-}time_dep_input_t;
+} time_data_t;
 
 typedef struct gammas_t {
     double gammax;

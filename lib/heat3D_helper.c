@@ -127,7 +127,7 @@ void mat_vec_mult(grid_size_t grid_size,
 void generate_coefficient_matrix(domain_size_t domain_size,
                                  grid_size_t grid_size,
                                  boundary_conditions_t boundary_conditions,
-                                 time_dep_input_t time_dep_input,
+                                 time_data_t time_data,
                                  gammas_t gammas,
                                  double (*source)(double x,double y,double z,double t),
                                  grid_coordinates_t* grid_coordinates,
@@ -139,7 +139,7 @@ void generate_coefficient_matrix(domain_size_t domain_size,
      * input        domain_size
      * input        grid_size
      * input        boundary_conditions
-     * input        time_dep_input
+     * input        time_data
      * input        gamma
      * input        source
      * input        grid_coordinates
@@ -170,9 +170,9 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     top_boundary    = boundary_conditions.boundary_type_faces.top_boundary;
 
     /* Initializing parameters */
-    dt = (double) (time_dep_input.tf - time_dep_input.ti)/time_dep_input.timesteps;
-    t  = time_dep_input.t;
-    K  = time_dep_input.rho*time_dep_input.Cp/dt;
+    dt = (double) (time_data.tf - time_data.ti)/time_data.timesteps;
+    t  = time_data.t;
+    K  = time_data.rho*time_data.Cp/dt;
 
     X = grid_coordinates->X;
     Y = grid_coordinates->Y;
@@ -868,14 +868,14 @@ void incomplete_cholesky_factorization(grid_size_t grid_size,
 
 
 void initialize_temperature_field(grid_size_t grid_size,
-                                  time_dep_input_t time_dep_input,
+                                  time_data_t time_data,
                                   double *temp_field)
 {
     /*
      * Initialize temperature field
      *
      * input    grid_size.
-     * input    time_dep_input
+     * input    time_data
      * output   x
      */
 
@@ -884,13 +884,13 @@ void initialize_temperature_field(grid_size_t grid_size,
     nt = grid_size.nx*grid_size.ny*grid_size.nz;
 
     for (j = 1; j <= nt; j++)
-        temp_field[j]  = time_dep_input.Tinitial;
+        temp_field[j]  = time_data.Tinitial;
 
 }
 
 
 /*-----------------------------------------------------------------------------------------------*/
-void initialize_time_data(time_dep_input_t time_data)
+void initialize_time_data(time_data_t time_data)
 {
     /*
      * Initialize temperature field

@@ -31,7 +31,7 @@ void mat_vec_mult(grid_size_t grid_size,
 void generate_coefficient_matrix(domain_size_t domain_size,
                                  grid_size_t grid_size,
                                  boundary_conditions_t boundary_conditions,
-                                 time_dep_input_t time_dep_input,
+                                 time_data_t time_data,
                                  gammas_t gammas,
                                  double (*source)(double x,double y,double z,double t),
                                  grid_coordinates_t* grid_coordinates,
@@ -52,10 +52,10 @@ void incomplete_cholesky_factorization(grid_size_t grid_size,
                                        double** L);
 
 void initialize_temperature_field(grid_size_t grid_size,
-                                  time_dep_input_t time_dep_input,
+                                  time_data_t time_data,
                                   double *temp_field);
 
-void initialize_time_data(time_dep_input_t time_data);
+void initialize_time_data(time_data_t time_data);
 
 void generate_grid_coordinates(domain_size_t domain_size,
                                grid_size_t grid_size,
