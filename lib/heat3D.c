@@ -20,7 +20,7 @@ void heat3D(domain_size_t domain_size,
             grid_size_t grid_size,
             boundary_conditions_t boundary_conditions,
             time_data_t time_data,
-            gammas_t gammas,
+            physical_paramaters_t physical_parameters,
             double (*source)(double x,double y,double z,double t),
             grid_coordinates_t* grid_coordinates,
             double ***T)
@@ -50,7 +50,7 @@ void heat3D(domain_size_t domain_size,
      * input     grid_size
      * input     boundary_conditions
      * input     time_data
-     * input     gammas
+     * input     physical_parameters
      * input     source()
      * output    grid_coordinates
      * output    T
@@ -61,11 +61,11 @@ void heat3D(domain_size_t domain_size,
     kershaw_algorithm_data_t* kershaw_data = NULL;
 
 
-    /*Allocating memory*/
+    /* Allocating memory */
     kershaw_data = allocate_kershaw_data(grid_size);
 
 
-    /*Initialize data*/
+    /* Initialize data */
     initialize_temperature_field(grid_size,
                                  time_data,
                                  kershaw_data->x);
@@ -74,10 +74,10 @@ void heat3D(domain_size_t domain_size,
                               grid_size,
                               grid_coordinates);
 
-    initialize_time_data(time_data);
+    initialize_time_data(&time_data);
 
 
-    /*Execute kershaw algorithm*/
+    /* Execute kershaw algorithm */
     begin = clock();
 
     do
@@ -86,7 +86,7 @@ void heat3D(domain_size_t domain_size,
                                     grid_size,
                                     boundary_conditions,
                                     time_data,
-                                    gammas,
+                                    physical_parameters,
                                     source,
                                     grid_coordinates,
                                     kershaw_data);
@@ -102,21 +102,20 @@ void heat3D(domain_size_t domain_size,
 
     }while (time_data.current_timestep < time_data.timesteps);
 
+    end = clock();
 
-    /*process results*/
+    /* Process results */
     processing_results(grid_size,
                        kershaw_data,
                        T);
 
 
-    /*deallocate data*/
+    /* Deallocate data */
     free_kershaw_data(kershaw_data, grid_size);
 
 
-    /*print some results*/
-    end = clock();
+    /* Print some results */
     time_spent = (end - begin)/CLOCKS_PER_SEC;
-
     printf("error: %E\n", kershaw_data->epsilon);
     printf("iterations: %d\n", kershaw_data->iterations);
     printf("running time: %f\n", time_spent);

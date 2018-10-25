@@ -46,18 +46,22 @@ typedef struct time_data_t {
     int current_timestep;
     double ti;
     double tf;
-    double rho;
-    double Cp;
     double Tinitial;
     double t;
     double dt;
 } time_data_t;
 
-typedef struct gammas_t {
+typedef struct conductivity_t {
     double gammax;
     double gammay;
     double gammaz;
-} gammas_t;
+} conductivity_t;
+
+typedef struct physical_paramaters_t {
+    conductivity_t conductivity;
+    double rho;
+    double Cp;
+} physical_paramaters_t;
 
 typedef enum boundary_type_t {
     NEUMANN = 0,
@@ -109,6 +113,5 @@ typedef struct kershaw_algorithm_data_t {
     double epsilon;
     int iterations;
 } kershaw_algorithm_data_t;
-
 
 #endif /* USER_TYPES_H_ */

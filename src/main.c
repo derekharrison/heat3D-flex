@@ -323,7 +323,9 @@ static void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
     boundary_conditions->flux_boundary_funcs.flux_boundary_north = &flux_boundary_north;
     boundary_conditions->flux_boundary_funcs.flux_boundary_bottom = &flux_boundary_bottom;
     boundary_conditions->flux_boundary_funcs.flux_boundary_top = &flux_boundary_top;
+
 }
+
 
 /*-----------------------------------------------------------------------------------------------*/
 int main(int argc, char *argv[])
@@ -332,12 +334,11 @@ int main(int argc, char *argv[])
     domain_size_t                 domain_size = {0};
     grid_size_t                     grid_size = {0};
     time_data_t                     time_data = {0};
-    gammas_t                           gammas = {0};
     grid_coordinates_t*      grid_coordinates = NULL;
     double***                               T = NULL;
     boundary_conditions_t boundary_conditions = {0};
     boundary_type_faces_t boundary_type_faces = {0};
-
+    physical_paramaters_t physical_parameters = {0};
 
     /* Set parameters and boundary conditions */
     domain_size.Lx = 5.0;                               //length of domain along x coordinate
@@ -351,19 +352,19 @@ int main(int argc, char *argv[])
     time_data.timesteps = 100;                          //number of timesteps
     time_data.ti        = 0.0;                          //initial time
     time_data.tf        = 0.1;                          //final time
-    time_data.rho       = 3.0;                          //density
-    time_data.Cp        = 10.0;                         //heat capacity
     time_data.Tinitial  = 10.0;                         //inital temperature of system
 
-    gammas.gammax = 15.1;                                //conductivity along x coordinate
-    gammas.gammay = 15.1;                                //conductivity along y coordinate
-    gammas.gammaz = 15.1;                                //conductivity along z coordinate
+    physical_parameters.conductivity.gammax = 15.1;     //conductivity along x coordinate
+    physical_parameters.conductivity.gammay = 15.1;     //conductivity along y coordinate
+    physical_parameters.conductivity.gammaz = 15.1;     //conductivity along z coordinate
+    physical_parameters.Cp                  = 10.0;     //heat capacity
+    physical_parameters.rho                 = 3.0;      //density
 
     boundary_type_faces.west_boundary   = DIRICHLET;    //west face boundary type
     boundary_type_faces.east_boundary   = DIRICHLET;    //east face boundary type
     boundary_type_faces.south_boundary  = DIRICHLET;    //bottom face boundary type
     boundary_type_faces.north_boundary  = DIRICHLET;    //north face boundary type
-    boundary_type_faces.bottom_boundary = DIRICHLET;  //bottom face boundary type
+    boundary_type_faces.bottom_boundary = DIRICHLET;    //bottom face boundary type
     boundary_type_faces.top_boundary    = DIRICHLET;    //top face boundary type
 
     exportData = TRUE;                                  //export data guard
@@ -375,7 +376,8 @@ int main(int argc, char *argv[])
 
 
     /* Setting boundary types and conditions */
-    set_boundary_conditions(boundary_type_faces, &boundary_conditions);
+    set_boundary_conditions(boundary_type_faces,
+                            &boundary_conditions);
 
 
     /* Calling 3D heat conduction solver */
@@ -383,7 +385,7 @@ int main(int argc, char *argv[])
            grid_size,
            boundary_conditions,
            time_data,
-           gammas,
+           physical_parameters,
            &source_equation,
            grid_coordinates,
            T);

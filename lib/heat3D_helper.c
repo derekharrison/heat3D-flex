@@ -128,7 +128,7 @@ void generate_coefficient_matrix(domain_size_t domain_size,
                                  grid_size_t grid_size,
                                  boundary_conditions_t boundary_conditions,
                                  time_data_t time_data,
-                                 gammas_t gammas,
+                                 physical_paramaters_t physical_parameters,
                                  double (*source)(double x,double y,double z,double t),
                                  grid_coordinates_t* grid_coordinates,
                                  kershaw_algorithm_data_t* kershaw_data)
@@ -140,7 +140,7 @@ void generate_coefficient_matrix(domain_size_t domain_size,
      * input        grid_size
      * input        boundary_conditions
      * input        time_data
-     * input        gamma
+     * input        physical_parameters
      * input        source
      * input        grid_coordinates
      * input/output kershaw_data
@@ -148,7 +148,7 @@ void generate_coefficient_matrix(domain_size_t domain_size,
 
     double deltax, deltay, deltaz;
     double b1, b2, b3;
-    double dt, t, K;
+    double t, K;
     double ***X, ***Y, ***Z;
     double *xo, *r, **A;
     int nn;
@@ -170,9 +170,8 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     top_boundary    = boundary_conditions.boundary_type_faces.top_boundary;
 
     /* Initializing parameters */
-    dt = (double) (time_data.tf - time_data.ti)/time_data.timesteps;
     t  = time_data.t;
-    K  = time_data.rho*time_data.Cp/dt;
+    K  = physical_parameters.rho*physical_parameters.Cp/time_data.dt;
 
     X = grid_coordinates->X;
     Y = grid_coordinates->Y;
@@ -182,15 +181,15 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     deltay = domain_size.Ly/grid_size.ny;
     deltaz = domain_size.Lz/grid_size.nz;
 
-    b1 = -gammas.gammax/(deltax*deltax);
-    b2 = -gammas.gammay/(deltay*deltay);
-    b3 = -gammas.gammaz/(deltaz*deltaz);
+    b1 = -physical_parameters.conductivity.gammax/(deltax*deltax);
+    b2 = -physical_parameters.conductivity.gammay/(deltay*deltay);
+    b3 = -physical_parameters.conductivity.gammaz/(deltaz*deltaz);
 
     xo = kershaw_data->x;
     r  = kershaw_data->r;
     A  = kershaw_data->A;
 
-    /*Generating vectorized coefficient matrix*/
+    /* Generating vectorized coefficient matrix */
     //Generating central coefficients and source terms
     for (i = 2; i <= grid_size.nx - 1; i++)
     for (j = 2; j <= grid_size.ny - 1; j++)
@@ -890,17 +889,17 @@ void initialize_temperature_field(grid_size_t grid_size,
 
 
 /*-----------------------------------------------------------------------------------------------*/
-void initialize_time_data(time_data_t time_data)
+void initialize_time_data(time_data_t* time_data)
 {
     /*
      * Initialize temperature field
      *
-     * output   time_data
+     * input/output   time_data
      */
 
-    time_data.t = time_data.ti;
-    time_data.current_timestep = 0;
-    time_data.dt = (time_data.tf - time_data.ti)/time_data.timesteps;
+    time_data->t = time_data->ti;
+    time_data->current_timestep = 0;
+    time_data->dt = (time_data->tf - time_data->ti)/time_data->timesteps;
 
 }
 
