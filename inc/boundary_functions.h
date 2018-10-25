@@ -8,6 +8,7 @@
 #ifndef BOUNDARY_FUNCTIONS_H_
 #define BOUNDARY_FUNCTIONS_H_
 
+
 double fixed_boundary_west(double y, double z, double t);
 double fixed_boundary_east(double y, double z, double t);
 double fixed_boundary_south(double x,double z, double t);

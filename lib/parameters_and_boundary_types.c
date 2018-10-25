@@ -7,6 +7,8 @@
 
 #include "../inc/user_types.h"
 
+
+/*-----------------------------------------------------------------------------------------------*/
 void set_parameters_and_boundary_types(domain_size_t* domain_size,
                                        grid_size_t* grid_size,
                                        time_data_t* time_data,
