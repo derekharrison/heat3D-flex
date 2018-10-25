@@ -5,6 +5,8 @@
  *      Author: derek
  */
 
+#include <stdlib.h>
+
 #include "../inc/mappings.h"
 #include "../inc/user_types.h"
 
