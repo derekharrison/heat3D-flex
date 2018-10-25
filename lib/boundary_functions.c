@@ -20,7 +20,7 @@ double fixed_boundary_west(double y, double z, double t)
      * return   temperature_west
      */
 
-    double temperature_west = 1.0;
+    double temperature_west = 300.0;
 
     return temperature_west;
 
@@ -41,7 +41,7 @@ double fixed_boundary_east(double y, double z, double t)
      * return   temperature_east
      */
 
-    double temperature_east = 2.0;
+    double temperature_east = 300.0;
 
     return temperature_east;
 
@@ -62,7 +62,7 @@ double fixed_boundary_south(double x,double z, double t)
      * return   temperature_south
      */
 
-    double temperature_south = 3.0;
+    double temperature_south = 300.0;
 
     return temperature_south;
 
@@ -83,7 +83,7 @@ double fixed_boundary_north(double x,double z, double t)
      * return   temperature_north
      */
 
-    double temperature_north = 0.5;
+    double temperature_north = 300.0;
 
     return temperature_north;
 
@@ -104,7 +104,7 @@ double fixed_boundary_bottom(double x,double y, double t)
      * return   temperature_bottom
      */
 
-    double temperature_bottom = 1.3;
+    double temperature_bottom = 300.0;
 
     return temperature_bottom;
 
@@ -125,7 +125,7 @@ double fixed_boundary_top(double x,double y, double t)
      * return   temperature_top
      */
 
-    double temperature_top = 2.1;
+    double temperature_top = 300.0;
 
     return temperature_top;
 

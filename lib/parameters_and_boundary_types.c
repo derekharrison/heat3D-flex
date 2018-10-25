@@ -28,31 +28,31 @@ void set_parameters_and_boundary_types(domain_size_t* domain_size,
      */
 
     /* Set parameters and boundary conditions */
-    domain_size->Lx = 5.0;                               //length of domain along x coordinate
-    domain_size->Ly = 1.0;                               //length of domain along y coordinate
-    domain_size->Lz = 5.0;                               //length of domain along z coordinate
+    domain_size->Lx = 0.5;                               //length of domain along x coordinate
+    domain_size->Ly = 0.5;                               //length of domain along y coordinate
+    domain_size->Lz = 1.0;                               //length of domain along z coordinate
 
-    grid_size->nx = 4;                                   //amount of nodes along x coordinate
-    grid_size->ny = 5;                                   //amount of nodes along y coordinate
-    grid_size->nz = 6;                                   //amount of nodes along z coordinate
+    grid_size->nx = 19;                                   //amount of nodes along x coordinate
+    grid_size->ny = 19;                                   //amount of nodes along y coordinate
+    grid_size->nz = 39;                                   //amount of nodes along z coordinate
 
     time_data->timesteps = 100;                          //number of timesteps
     time_data->ti        = 0.0;                          //initial time
-    time_data->tf        = 0.1;                          //final time
+    time_data->tf        = 100.1;                          //final time
     time_data->Tinitial  = 10.0;                         //inital temperature of system
 
     physical_parameters->conductivity.gammax = 15.1;     //conductivity along x coordinate
     physical_parameters->conductivity.gammay = 15.1;     //conductivity along y coordinate
     physical_parameters->conductivity.gammaz = 15.1;     //conductivity along z coordinate
-    physical_parameters->Cp                  = 10.0;     //heat capacity
-    physical_parameters->rho                 = 3.0;      //density
+    physical_parameters->Cp                  = 1.0;     //heat capacity
+    physical_parameters->rho                 = 1.0;      //density
 
-    boundary_type_faces->west_boundary   = DIRICHLET;    //west face boundary type
+    boundary_type_faces->west_boundary   = NEUMANN;    //west face boundary type
     boundary_type_faces->east_boundary   = DIRICHLET;    //east face boundary type
-    boundary_type_faces->south_boundary  = DIRICHLET;    //bottom face boundary type
+    boundary_type_faces->south_boundary  = NEUMANN;    //bottom face boundary type
     boundary_type_faces->north_boundary  = DIRICHLET;    //north face boundary type
     boundary_type_faces->bottom_boundary = DIRICHLET;    //bottom face boundary type
-    boundary_type_faces->top_boundary    = DIRICHLET;    //top face boundary type
+    boundary_type_faces->top_boundary    = NEUMANN;    //top face boundary type
 
     *exportData = TRUE;                                  //export data guard
 
