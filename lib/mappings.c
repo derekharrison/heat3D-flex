@@ -15,11 +15,19 @@
 /*-----------------------------------------------------------------------------------------------*/
 double* boundary_switch_mapper(double den)
 {
-    double* boundary_switch = malloc(sizeof(double) * 2);
-    boundary_switch[NEUMANN] = -1.0/den;
-    boundary_switch[DIRICHLET] = 1.0;
+    /*
+     * Create boundary switch map
+     *
+     * input    den
+     *
+     * return   boundary_switch_map
+     */
 
-    return boundary_switch;
+    double* boundary_switch_map = malloc(sizeof(double) * 2);
+    boundary_switch_map[NEUMANN] = -1.0/den;
+    boundary_switch_map[DIRICHLET] = 1.0;
+
+    return boundary_switch_map;
 }
 
 

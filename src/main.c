@@ -19,85 +19,11 @@
 #include "../inc/boundary_functions.h"
 #include "../inc/export_data.h"
 #include "../inc/heat3D.h"
+#include "../inc/main_utils.h"
+#include "../inc/mappings.h"
 #include "../inc/memory_functions.h"
 #include "../inc/parameters_and_boundary_types.h"
 #include "../inc/user_types.h"
-#include "../inc/mappings.h"
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static func_pointer set_boundary_funcs(boundary_type_t boundary_type,
-                                       func_pointer boundary_func_fixed,
-                                       func_pointer boundary_func_flux)
-{
-    /*
-     * Set boundary function types for faces
-     *
-     * input    boundary_type
-     * input    boundary_func_fixed
-     * input    boundary_func_flux
-     *
-     * return   boundary_func
-     */
-
-    func_pointer boundary_func;
-
-    if(boundary_type == DIRICHLET)
-    {
-        boundary_func = boundary_func_fixed;
-    }
-    else
-    {
-        boundary_func = boundary_func_flux;
-    }
-
-    return boundary_func;
-
-}
-
-
-/*-----------------------------------------------------------------------------------------------*/
-static void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
-                                    boundary_conditions_t* boundary_conditions)
-{
-    /*
-     * Set input boundary conditions and types for heat3D solver
-     *
-     * input    boundary_type_faces
-     * output   boundary_conditions
-     */
-
-    boundary_t boundary_type;
-
-
-    /* Create array mappings */
-    boundary_type_t* boundary_type_map = boundary_type_mapper(boundary_type_faces);
-    boundary_func_type_t* boundary_func_type_map = boundary_func_type_mapper();
-    func_pointer* boundary_func_map = boundary_func_mapper(boundary_conditions);
-
-
-    /* Set boundary types */
-    boundary_conditions->boundary_type_faces = boundary_type_faces;
-
-
-    /* Set boundary functions */
-    for(boundary_type = WEST; boundary_type <= TOP; boundary_type++)
-    {
-        boundary_func_map[boundary_type] = set_boundary_funcs(boundary_type_map[boundary_type],
-                                                              boundary_func_type_map[boundary_type].fixed_boundary,
-                                                              boundary_func_type_map[boundary_type].flux_boundary);
-    }
-
-    boundary_mapper(boundary_func_map,
-                    boundary_conditions);
-
-
-    /* Free array mappings */
-    free(boundary_type_map);
-    free(boundary_func_type_map);
-    free(boundary_func_map);
-
-}
 
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -114,33 +40,12 @@ int main(int argc, char *argv[])
     physical_paramaters_t physical_parameters = {0};
 
     /* Set parameters and boundary conditions */
-    domain_size.Lx = 5.0;                               //length of domain along x coordinate
-    domain_size.Ly = 1.0;                               //length of domain along y coordinate
-    domain_size.Lz = 5.0;                               //length of domain along z coordinate
-
-    grid_size.nx = 4;                                   //amount of nodes along x coordinate
-    grid_size.ny = 5;                                   //amount of nodes along y coordinate
-    grid_size.nz = 6;                                   //amount of nodes along z coordinate
-
-    time_data.timesteps = 100;                          //number of timesteps
-    time_data.ti        = 0.0;                          //initial time
-    time_data.tf        = 0.1;                          //final time
-    time_data.Tinitial  = 10.0;                         //inital temperature of system
-
-    physical_parameters.conductivity.gammax = 15.1;     //conductivity along x coordinate
-    physical_parameters.conductivity.gammay = 15.1;     //conductivity along y coordinate
-    physical_parameters.conductivity.gammaz = 15.1;     //conductivity along z coordinate
-    physical_parameters.Cp                  = 10.0;     //heat capacity
-    physical_parameters.rho                 = 3.0;      //density
-
-    boundary_type_faces.west_boundary   = DIRICHLET;    //west face boundary type
-    boundary_type_faces.east_boundary   = DIRICHLET;    //east face boundary type
-    boundary_type_faces.south_boundary  = DIRICHLET;    //bottom face boundary type
-    boundary_type_faces.north_boundary  = DIRICHLET;    //north face boundary type
-    boundary_type_faces.bottom_boundary = DIRICHLET;    //bottom face boundary type
-    boundary_type_faces.top_boundary    = DIRICHLET;    //top face boundary type
-
-    exportData = TRUE;                                  //export data guard
+    set_parameters_and_boundary_types(&domain_size,
+                                      &grid_size,
+                                      &time_data,
+                                      &physical_parameters,
+                                      &boundary_type_faces,
+                                      &exportData);
 
 
     /* Allocating memory for input and output of poisson solver */
