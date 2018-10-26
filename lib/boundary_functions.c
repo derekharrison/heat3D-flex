@@ -275,7 +275,7 @@ double source_equation(double x, double y, double z, double t)
      * return   q
      */
 
-    double q = 100.0;
+    double q = 0.0;
 
     return q;
 

@@ -32,20 +32,20 @@ void set_parameters_and_boundary_types(domain_size_t* domain_size,
     domain_size->Ly = 0.5;                               //length of domain along y coordinate
     domain_size->Lz = 1.0;                               //length of domain along z coordinate
 
-    grid_size->nx = 19;                                   //amount of nodes along x coordinate
-    grid_size->ny = 19;                                   //amount of nodes along y coordinate
-    grid_size->nz = 39;                                   //amount of nodes along z coordinate
+    grid_size->nx = 5;                                   //amount of nodes along x coordinate
+    grid_size->ny = 5;                                   //amount of nodes along y coordinate
+    grid_size->nz = 9;                                   //amount of nodes along z coordinate
 
     time_data->timesteps = 100;                          //number of timesteps
     time_data->ti        = 0.0;                          //initial time
-    time_data->tf        = 100.1;                          //final time
+    time_data->tf        = 100.0;                          //final time
     time_data->Tinitial  = 10.0;                         //inital temperature of system
 
     physical_parameters->conductivity.gammax = 15.1;     //conductivity along x coordinate
     physical_parameters->conductivity.gammay = 15.1;     //conductivity along y coordinate
     physical_parameters->conductivity.gammaz = 15.1;     //conductivity along z coordinate
-    physical_parameters->Cp                  = 1.0;     //heat capacity
-    physical_parameters->rho                 = 1.0;      //density
+    physical_parameters->Cp                  = 10.0;     //heat capacity
+    physical_parameters->rho                 = 3.0;      //density
 
     boundary_type_faces->west_boundary   = NEUMANN;    //west face boundary type
     boundary_type_faces->east_boundary   = DIRICHLET;    //east face boundary type
