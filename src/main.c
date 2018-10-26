@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     boundary_type_faces_t boundary_type_faces = {0};
     physical_paramaters_t physical_parameters = {0};
 
+
     /* Set parameters and boundary conditions */
     set_parameters_and_boundary_types(&domain_size,
                                       &grid_size,
