@@ -38,7 +38,7 @@ void set_parameters_and_boundary_types(domain_size_t* domain_size,
 
     time_data->timesteps = 100;                          //number of timesteps
     time_data->ti        = 0.0;                          //initial time
-    time_data->tf        = 100.0;                          //final time
+    time_data->tf        = 0.1;                          //final time
     time_data->Tinitial  = 0.0;                         //inital temperature of system
 
     physical_parameters->conductivity.gammax = 15.1;     //conductivity along x coordinate
