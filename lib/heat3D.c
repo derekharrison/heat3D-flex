@@ -97,8 +97,7 @@ void heat3D(domain_size_t domain_size,
         execute_kershaw_algorithm(grid_size,
                                   kershaw_data);
 
-        time_data.t = time_data.t + time_data.dt;
-        time_data.current_timestep++;
+        update_time_data(&time_data);
 
     }while (time_data.current_timestep < time_data.timesteps);
 
@@ -112,10 +111,9 @@ void heat3D(domain_size_t domain_size,
 
     /* Print some results */
     time_spent = (end - begin)/CLOCKS_PER_SEC;
-    printf("error: %E\n", kershaw_data->epsilon);
-    printf("iterations: %d\n", kershaw_data->iterations);
-    printf("running time: %f\n", time_spent);
 
+    print_results(kershaw_data,
+                  time_spent);
 
 
     /* Deallocate data */
