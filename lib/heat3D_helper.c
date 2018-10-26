@@ -154,6 +154,8 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     double *xo, *r, **A;
     int nn;
     int i, j, k;
+    double *wb_switch, *eb_switch, *sb_switch;
+    double *nb_switch, *bb_switch, *tb_switch;
     boundary_type_t wb_type, eb_type, sb_type;
     boundary_type_t nb_type, bb_type, tb_type;
     boundary_funcs_t boundary_funcs;
@@ -192,12 +194,12 @@ void generate_coefficient_matrix(domain_size_t domain_size,
 
 
     /* Setting switches */
-    double* wb_switch = boundary_switch_mapper(deltax * 2 * b1);
-    double* eb_switch = boundary_switch_mapper(deltax * 2 * b1);
-    double* sb_switch = boundary_switch_mapper(deltay * 2 * b2);
-    double* nb_switch = boundary_switch_mapper(deltay * 2 * b2);
-    double* bb_switch = boundary_switch_mapper(deltaz * 2 * b3);
-    double* tb_switch = boundary_switch_mapper(deltaz * 2 * b3);
+    wb_switch = boundary_switch_mapper(deltax * 2 * b1);
+    eb_switch = boundary_switch_mapper(deltax * 2 * b1);
+    sb_switch = boundary_switch_mapper(deltay * 2 * b2);
+    nb_switch = boundary_switch_mapper(deltay * 2 * b2);
+    bb_switch = boundary_switch_mapper(deltaz * 2 * b3);
+    tb_switch = boundary_switch_mapper(deltaz * 2 * b3);
 
 
     /* Generating vectorized coefficient matrix */
