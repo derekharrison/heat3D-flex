@@ -194,10 +194,10 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     /* Setting switches */
     double* wb_switch = boundary_switch_mapper(deltax * 2 * b1);
     double* eb_switch = boundary_switch_mapper(deltax * 2 * b1);
-    double* sb_switch = boundary_switch_mapper(deltax * 2 * b2);
-    double* nb_switch = boundary_switch_mapper(deltax * 2 * b2);
-    double* bb_switch = boundary_switch_mapper(deltax * 2 * b3);
-    double* tb_switch = boundary_switch_mapper(deltax * 2 * b3);
+    double* sb_switch = boundary_switch_mapper(deltay * 2 * b2);
+    double* nb_switch = boundary_switch_mapper(deltay * 2 * b2);
+    double* bb_switch = boundary_switch_mapper(deltaz * 2 * b3);
+    double* tb_switch = boundary_switch_mapper(deltaz * 2 * b3);
 
 
     /* Generating vectorized coefficient matrix */
