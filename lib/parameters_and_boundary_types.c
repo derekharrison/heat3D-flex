@@ -33,8 +33,8 @@ void set_parameters_and_boundary_types(domain_size_t* domain_size,
     domain_size->Lz = 1.0;                               //length of domain along z coordinate
 
     grid_size->nx = 4;                                   //amount of nodes along x coordinate
-    grid_size->ny = 4;                                   //amount of nodes along y coordinate
-    grid_size->nz = 4;                                   //amount of nodes along z coordinate
+    grid_size->ny = 5;                                   //amount of nodes along y coordinate
+    grid_size->nz = 6;                                   //amount of nodes along z coordinate
 
     time_data->timesteps = 10;                          //number of timesteps
     time_data->ti        = 0.0;                          //initial time
