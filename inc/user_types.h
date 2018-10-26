@@ -88,24 +88,6 @@ typedef struct boundary_type_faces_t {
     boundary_type_t top_boundary;
 } boundary_type_faces_t;
 
-typedef struct fixed_boundary_funcs_t {
-    double (*fixed_boundary_west) (double y, double z, double t);
-    double (*fixed_boundary_east) (double y, double z, double t);
-    double (*fixed_boundary_south) (double x,double z, double t);
-    double (*fixed_boundary_north) (double x,double z, double t);
-    double (*fixed_boundary_bottom) (double x,double y, double t);
-    double (*fixed_boundary_top) (double x,double y, double t);
-} fixed_boundary_funcs_t;
-
-typedef struct flux_boundary_funcs_t {
-    double (*flux_boundary_west) (double y, double z, double t);
-    double (*flux_boundary_east) (double y, double z, double t);
-    double (*flux_boundary_south) (double x,double z, double t);
-    double (*flux_boundary_north) (double x,double z, double t);
-    double (*flux_boundary_bottom) (double x,double y, double t);
-    double (*flux_boundary_top) (double x,double y, double t);
-} flux_boundary_funcs_t;
-
 typedef struct boundary_funcs_t {
     double (*boundary_west) (double y, double z, double t);
     double (*boundary_east) (double y, double z, double t);
@@ -122,8 +104,6 @@ typedef struct boundary_func_type_t {
 
 typedef struct boundary_conditions_t {
     boundary_type_faces_t boundary_type_faces;
-    fixed_boundary_funcs_t fixed_boundary_funcs;
-    flux_boundary_funcs_t flux_boundary_funcs;
     boundary_funcs_t boundary_funcs;
 } boundary_conditions_t;
 
