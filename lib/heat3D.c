@@ -110,14 +110,15 @@ void heat3D(domain_size_t domain_size,
                        T);
 
 
-    /* Deallocate data */
-    free_kershaw_data(kershaw_data, grid_size);
-
-
     /* Print some results */
     time_spent = (end - begin)/CLOCKS_PER_SEC;
     printf("error: %E\n", kershaw_data->epsilon);
     printf("iterations: %d\n", kershaw_data->iterations);
     printf("running time: %f\n", time_spent);
+
+
+
+    /* Deallocate data */
+    free_kershaw_data(kershaw_data, grid_size);
 
 }
