@@ -1007,3 +1007,35 @@ void processing_results(grid_size_t grid_size,
     }
 
 }
+
+
+/*-----------------------------------------------------------------------------------------------*/
+void update_time_data(time_data_t* time_data)
+{
+    /*
+     * Update time data
+     *
+     * input/output time_data
+     */
+
+    time_data->t = time_data->t + time_data->dt;
+    time_data->current_timestep++;
+
+}
+
+
+/*-----------------------------------------------------------------------------------------------*/
+void print_results(kershaw_algorithm_data_t* kershaw_data,
+                   double time_spent)
+{
+    /*
+     * Print some results
+     *
+     * input    kershaw_data
+     * input    time_spent
+     */
+
+    printf("error: %E\n", kershaw_data->epsilon);
+    printf("iterations: %d\n", kershaw_data->iterations);
+    printf("running time: %f\n", time_spent);
+}

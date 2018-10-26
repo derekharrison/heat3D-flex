@@ -71,4 +71,9 @@ void processing_results(grid_size_t grid_size,
                         kershaw_algorithm_data_t* kershaw_data,
                         double*** T);
 
+void update_time_data(time_data_t* time_data);
+
+void print_results(kershaw_algorithm_data_t* kershaw_data,
+                   double time_spent);
+
 #endif /* heat3D_HELPER_H_ */
