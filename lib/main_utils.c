@@ -53,7 +53,7 @@ void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
      * output   boundary_conditions
      */
 
-    boundary_t boundary_type;
+    boundary_t boundary_face;
 
 
     /* Create array mappings */
@@ -67,11 +67,11 @@ void set_boundary_conditions(boundary_type_faces_t boundary_type_faces,
 
 
     /* Set boundary functions */
-    for(boundary_type = WEST; boundary_type <= TOP; boundary_type++)
+    for(boundary_face = WEST; boundary_face <= TOP; boundary_face++)
     {
-        boundary_func_map[boundary_type] = set_boundary_funcs(boundary_type_map[boundary_type],
-                                                              boundary_func_type_map[boundary_type].fixed_boundary,
-                                                              boundary_func_type_map[boundary_type].flux_boundary);
+        boundary_func_map[boundary_face] = set_boundary_funcs(boundary_type_map[boundary_face],
+                                                              boundary_func_type_map[boundary_face].fixed_boundary,
+                                                              boundary_func_type_map[boundary_face].flux_boundary);
     }
 
     boundary_mapper(boundary_func_map,

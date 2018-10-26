@@ -7,6 +7,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../inc/memory_functions.h"
 #include "../inc/mappings.h"
@@ -662,6 +663,15 @@ void generate_coefficient_matrix(domain_size_t domain_size,
                 - (b3*xo[nn-grid_size.nx*grid_size.ny] + b2*xo[nn-grid_size.nx] + b1*xo[nn-1] +
                    A[nn][4]*xo[nn]);
     }
+
+
+    /* Deallocate memory */
+    free(wb_switch);
+    free(eb_switch);
+    free(sb_switch);
+    free(nb_switch);
+    free(bb_switch);
+    free(tb_switch);
 
 }
 
