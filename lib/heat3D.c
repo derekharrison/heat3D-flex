@@ -103,6 +103,7 @@ void heat3D(domain_size_t domain_size,
 
     end = clock();
 
+
     /* Process results */
     processing_results(grid_size,
                        kershaw_data,

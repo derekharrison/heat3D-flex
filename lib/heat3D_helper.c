@@ -194,7 +194,7 @@ void generate_coefficient_matrix(domain_size_t domain_size,
     A  = kershaw_data->A;
 
 
-    /* Setting switches */
+    /* Setting  boundary switches */
     wb_switch = boundary_switch_mapper(deltax * 2 * b1);
     eb_switch = boundary_switch_mapper(deltax * 2 * b1);
     sb_switch = boundary_switch_mapper(deltay * 2 * b2);
@@ -913,6 +913,7 @@ void execute_kershaw_algorithm(grid_size_t grid_size,
                kershaw_data->p);
 
     kershaw_data->iterations = 0;
+
     do
     {
         dot_product(kershaw_data->r,
