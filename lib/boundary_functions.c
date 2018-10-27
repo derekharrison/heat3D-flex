@@ -21,12 +21,12 @@ double boundary_west(double y, double z, double t)
      * input    z
      * input    t
      *
-     * return   temperature_west
+     * return   f
      */
 
-    double temperature_west = 300.0;
+    double f = 300.0;
 
-    return temperature_west;
+    return f;
 
 }
 
@@ -46,12 +46,12 @@ double boundary_east(double y, double z, double t)
      * input    z
      * input    t
      *
-     * return   temperature_east
+     * return   f
      */
 
-    double temperature_east = 800.0;
+    double f = 800.0;
 
-    return temperature_east;
+    return f;
 
 }
 
@@ -71,12 +71,12 @@ double boundary_south(double x,double z, double t)
      * input    z
      * input    t
      *
-     * return   temperature_south
+     * return   f
      */
 
-    double temperature_south = 300.0;
+    double f = 300.0;
 
-    return temperature_south;
+    return f;
 
 }
 
@@ -96,12 +96,12 @@ double boundary_north(double x,double z, double t)
      * input    z
      * input    t
      *
-     * return   temperature_north
+     * return   f
      */
 
-    double temperature_north = 800.0;
+    double f = 800.0;
 
-    return temperature_north;
+    return f;
 
 }
 
@@ -121,12 +121,12 @@ double boundary_bottom(double x,double y, double t)
      * input    y
      * input    t
      *
-     * return   temperature_bottom
+     * return   f
      */
 
-    double temperature_bottom = 800.0;
+    double f = 800.0;
 
-    return temperature_bottom;
+    return f;
 
 }
 
@@ -146,12 +146,12 @@ double boundary_top(double x,double y, double t)
      * input    y
      * input    t
      *
-     * return   temperature_top
+     * return   f
      */
 
-    double temperature_top = 300.0;
+    double f = 300.0;
 
-    return temperature_top;
+    return f;
 
 }
 
