@@ -15,7 +15,7 @@ double boundary_west(double y, double z, double t)
      * If the boundary is of type DIRICHLET, specify the temperature distribution. If the boundary
      * is of type NEUMANN specify the flux distribution.
      *
-     * The distribution or flux is of the form f(y,z,t).
+     * The temperature or flux distribution is of the form f(y,z,t).
      *
      * input    y
      * input    z
@@ -40,7 +40,7 @@ double boundary_east(double y, double z, double t)
      * If the boundary is of type DIRICHLET, specify the temperature distribution. If the boundary
      * is of type NEUMANN specify the flux distribution.
      *
-     * The distribution or flux is of the form f(y,z,t).
+     * The temperature or flux distribution is of the form f(y,z,t).
      *
      * input    y
      * input    z
@@ -65,7 +65,7 @@ double boundary_south(double x,double z, double t)
      * If the boundary is of type DIRICHLET, specify the temperature distribution. If the boundary
      * is of type NEUMANN specify the flux distribution.
      *
-     * The distribution or flux is of the form f(x,z,t).
+     * The temperature or flux distribution is of the form f(x,z,t).
      *
      * input    x
      * input    z
@@ -90,7 +90,7 @@ double boundary_north(double x,double z, double t)
      * If the boundary is of type DIRICHLET, specify the temperature distribution. If the boundary
      * is of type NEUMANN specify the flux distribution.
      *
-     * The distribution or flux is of the form f(x,z,t).
+     * The temperature or flux distribution is of the form f(x,z,t).
      *
      * input    x
      * input    z
@@ -115,7 +115,7 @@ double boundary_bottom(double x,double y, double t)
      * If the boundary is of type DIRICHLET, specify the temperature distribution. If the boundary
      * is of type NEUMANN specify the flux distribution.
      *
-     * The distribution or flux is of the form f(x,y,t).
+     * The temperature or flux distribution is of the form f(x,y,t).
      *
      * input    x
      * input    y
@@ -140,7 +140,7 @@ double boundary_top(double x,double y, double t)
      * If the boundary is of type DIRICHLET, specify the temperature distribution. If the boundary
      * is of type NEUMANN specify the flux distribution.
      *
-     * The distribution or flux is of the form f(x,y,t).
+     * The temperature or flux distribution is of the form f(x,y,t).
      *
      * input    x
      * input    y
