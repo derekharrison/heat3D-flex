@@ -21,3 +21,7 @@ heat3Dref2.txt
 heat3Dref3.txt
 .metadata
 .settings
+*aux
+*log
+*gz
+*tex
