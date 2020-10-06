@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
         export_data(grid_size, grid_coordinates, T);
     }
 
+
     /* Freeing memory */
     free_grid_coordinates(grid_coordinates, grid_size.nx+1, grid_size.ny+1);
     free_memory_3D(T, grid_size.nx+1, grid_size.ny+1);

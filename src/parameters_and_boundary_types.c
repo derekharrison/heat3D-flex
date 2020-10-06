@@ -32,13 +32,13 @@ void set_parameters_and_boundary_types(domain_size_t* domain_size,
     domain_size->Ly = 1.0;                               //length of domain along y coordinate
     domain_size->Lz = 1.0;                               //length of domain along z coordinate
 
-    grid_size->nx = 40;                                   //amount of nodes along x coordinate
-    grid_size->ny = 40;                                   //amount of nodes along y coordinate
-    grid_size->nz = 40;                                   //amount of nodes along z coordinate
+    grid_size->nx = 30;                                   //amount of nodes along x coordinate
+    grid_size->ny = 30;                                   //amount of nodes along y coordinate
+    grid_size->nz = 30;                                   //amount of nodes along z coordinate
 
-    time_data->timesteps = 100;                          //number of timesteps
+    time_data->timesteps = 200;                          //number of timesteps
     time_data->ti        = 0.0;                          //initial time
-    time_data->tf        = 0.02;                          //final time
+    time_data->tf        = 0.25;                          //final time
     time_data->Tinitial  = 0.0;                         //inital temperature of system
 
     physical_parameters->conductivity.gammax = 1.0;     //conductivity along x coordinate
