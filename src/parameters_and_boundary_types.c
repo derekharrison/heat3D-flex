@@ -23,7 +23,7 @@ void set_parameters_and_boundary_types(domain_size_t* domain_size,
      * output   grid_size
      * output   time_data
      * output   physical_parameters
-     * output   temperature_west
+     * output   boundary_type_faces
      * output   exportData
      */
 
