@@ -25,7 +25,7 @@ double boundary_west(double y, double z, double t)
      * return   f
      */
 
-    double f = 1.0;
+    double f = 0.0;
 
     return f;
 
@@ -50,7 +50,7 @@ double boundary_east(double y, double z, double t)
      * return   f
      */
 
-    double f = 1.0;
+    double f = 0.0;
 
     return f;
 
@@ -75,7 +75,7 @@ double boundary_south(double x,double z, double t)
      * return   f
      */
 
-    double f = 1.0;
+    double f = 0.0;
 
     return f;
 
@@ -100,7 +100,7 @@ double boundary_north(double x,double z, double t)
      * return   f
      */
 
-    double f = 1.0;
+    double f = 0.0;
 
     return f;
 
@@ -125,7 +125,7 @@ double boundary_bottom(double x,double y, double t)
      * return   f
      */
 
-    double f = 1.0;
+    double f = 0.0;
 
     return f;
 
@@ -150,7 +150,7 @@ double boundary_top(double x,double y, double t)
      * return   f
      */
 
-    double f = 1.0;
+    double f = 0.0;
 
     return f;
 
@@ -175,7 +175,7 @@ double source_equation(double x, double y, double z, double t)
      * return   q
      */
 
-    double q = 0;
+    double q = -sin(M_PI*x) * sin(M_PI*y) * sin(M_PI*z);
 
     return q;
 

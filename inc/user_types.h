@@ -115,6 +115,7 @@ typedef struct kershaw_algorithm_data_t {
     double* z;
     double* Ap;
     double* p;
+    double* lltr;
     double* x;
     double epsilon;
     int iterations;

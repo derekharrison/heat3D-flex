@@ -274,14 +274,15 @@ kershaw_algorithm_data_t* allocate_kershaw_data(grid_size_t grid_size)
 
     kershaw_algorithm_data_t* kershaw_data = malloc(sizeof(kershaw_algorithm_data_t));
 
-    kershaw_data->A  = matrix2D(nt+1,4+1);
-    kershaw_data->L  = matrix2D(nt+1,4+1);
-    kershaw_data->y  = matrix1D(nt+1);
-    kershaw_data->z  = matrix1D(nt+1);
-    kershaw_data->p  = matrix1D(nt+1);
-    kershaw_data->Ap = matrix1D(nt+1);
-    kershaw_data->x  = matrix1D(nt+1);
-    kershaw_data->r  = matrix1D(nt+1);
+    kershaw_data->A    = matrix2D(nt+1,4+1);
+    kershaw_data->L    = matrix2D(nt+1,4+1);
+    kershaw_data->y    = matrix1D(nt+1);
+    kershaw_data->z    = matrix1D(nt+1);
+    kershaw_data->p    = matrix1D(nt+1);
+    kershaw_data->lltr = matrix1D(nt+1);
+    kershaw_data->Ap   = matrix1D(nt+1);
+    kershaw_data->x    = matrix1D(nt+1);
+    kershaw_data->r    = matrix1D(nt+1);
 
     return kershaw_data;
 }
@@ -308,6 +309,7 @@ void free_kershaw_data(kershaw_algorithm_data_t* kershaw_data,
     free_memory_1D(kershaw_data->y);
     free_memory_1D(kershaw_data->z);
     free_memory_1D(kershaw_data->p);
+    free_memory_1D(kershaw_data->lltr);
     free_memory_1D(kershaw_data->Ap);
     free_memory_1D(kershaw_data->x);
     free_memory_1D(kershaw_data->r);

@@ -924,10 +924,10 @@ void execute_kershaw_algorithm(grid_size_t grid_size,
         LTz_solver(grid_size,
                    kershaw_data->L,
                    kershaw_data->y,
-                   kershaw_data->p);
+                   kershaw_data->lltr);
 
         dot_product(kershaw_data->r,
-                    kershaw_data->p,
+                    kershaw_data->lltr,
                     nt,
                     &delold);
 
